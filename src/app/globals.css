@@ -1,0 +1,421 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXooxWtvZg.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Core Backgrounds */
+  --background: #050505;
+  --background-elevated: #0A0A0A;
+  --background-card: #0D0D0D;
+  --background-hover: #151515;
+
+  /* Jaguar Gold Palette */
+  --gold-primary: #D4A74B;
+  --gold-light: #E8C875;
+  --gold-dark: #A67C32;
+  --amber: #F5A623;
+
+  /* Neon Accent Gradient (from logo) */
+  --neon-orange: #FF6B00;
+  --neon-magenta: #E91E8C;
+  --neon-cyan: #00D4FF;
+  --neon-green: #39FF14;
+
+  /* Combat Red */
+  --blood-red: #DC2626;
+  --crimson: #991B1B;
+
+  /* Borders & Lines */
+  --border: #1A1A1A;
+  --border-gold: rgba(212, 167, 75, 0.3);
+
+  /* Text Hierarchy */
+  --text-primary: #FFFFFF;
+  --text-secondary: #9CA3AF;
+  --text-muted: #4B5563;
+  --text-gold: #D4A74B;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-elevated: var(--background-elevated);
+  --color-background-card: var(--background-card);
+  --color-background-hover: var(--background-hover);
+
+  --color-gold: var(--gold-primary);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-amber: var(--amber);
+
+  --color-neon-orange: var(--neon-orange);
+  --color-neon-magenta: var(--neon-magenta);
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-green: var(--neon-green);
+
+  --color-blood-red: var(--blood-red);
+  --color-crimson: var(--crimson);
+
+  --color-border: var(--border);
+  --color-border-gold: var(--border-gold);
+
+  --color-foreground: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-gold: var(--text-gold);
+
+  --font-display: 'Bebas Neue', 'Impact', sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+@layer base {
+  * {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Display Headings - Bebas Neue */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.9;
+}
+
+/* Body Headings */
+h4, h5, h6 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar:horizontal {
+  height: 0;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
+}
+
+/* Text Selection */
+::selection {
+  background: var(--gold-primary);
+  color: var(--background);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Gold Glow Effects */
+.glow-gold {
+  box-shadow:
+    0 0 20px rgba(212, 167, 75, 0.3),
+    0 0 40px rgba(212, 167, 75, 0.1);
+}
+
+.glow-gold-intense {
+  box-shadow:
+    0 0 30px rgba(212, 167, 75, 0.5),
+    0 0 60px rgba(212, 167, 75, 0.3),
+    0 0 100px rgba(212, 167, 75, 0.1);
+}
+
+/* Neon Gradient Glow */
+.glow-neon-gradient {
+  box-shadow:
+    0 0 20px rgba(255, 107, 0, 0.3),
+    0 0 40px rgba(233, 30, 140, 0.2),
+    0 0 60px rgba(0, 212, 255, 0.1);
+}
+
+/* Text Glow */
+.text-glow-gold {
+  text-shadow:
+    0 0 20px rgba(212, 167, 75, 0.5),
+    0 0 40px rgba(212, 167, 75, 0.3);
+}
+
+/* Gradient Text */
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-primary), var(--gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-neon {
+  background: linear-gradient(90deg, var(--neon-orange), var(--neon-magenta), var(--neon-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Border Gradient */
+.border-gradient-gold {
+  border: 1px solid transparent;
+  background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+              linear-gradient(135deg, var(--gold-primary), transparent 50%, var(--gold-dark)) border-box;
+}
+
+.border-gradient-neon {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--background), var(--background)) padding-box,
+              linear-gradient(90deg, var(--neon-orange), var(--neon-magenta), var(--neon-cyan)) border-box;
+}
+
+/* Animated Border */
+@keyframes borderGlow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.border-pulse {
+  animation: borderGlow 2s ease-in-out infinite;
+}
+
+/* Card Styles */
+.card-predator {
+  background: var(--background-card);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-predator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.card-predator:hover {
+  border-color: var(--gold-primary);
+  transform: translateY(-4px);
+}
+
+.card-predator:hover::before {
+  opacity: 1;
+}
+
+/* Noise Texture Overlay */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Jaguar Pattern Overlay */
+.jaguar-pattern {
+  position: relative;
+}
+
+.jaguar-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(212, 167, 75, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(212, 167, 75, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Diagonal Lines Pattern */
+.diagonal-lines {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(212, 167, 75, 0.03) 2px,
+    rgba(212, 167, 75, 0.03) 4px
+  );
+}
+
+/* Button Base */
+.btn-predator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-predator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-predator:hover::before {
+  left: 100%;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+  color: var(--background);
+}
+
+.btn-gold:hover {
+  box-shadow: 0 0 30px rgba(212, 167, 75, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-outline-gold {
+  background: transparent;
+  border: 2px solid var(--gold-primary);
+  color: var(--gold-primary);
+}
+
+.btn-outline-gold:hover {
+  background: var(--gold-primary);
+  color: var(--background);
+}
+
+/* Section Divider */
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+  opacity: 0.3;
+}
+
+/* Stagger Animation Delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* Ring Effect */
+@keyframes ringPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.ring-pulse {
+  position: relative;
+}
+
+.ring-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--gold-primary);
+  border-radius: 50%;
+  animation: ringPulse 2s ease-out infinite;
+}
+
+/* Stats Counter Style */
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  line-height: 1;
+  background: linear-gradient(180deg, var(--text-primary), var(--gold-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Standard section title token (Location / Class Schedule / Testimonials) */
+.section-title-standard {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5.4vw, 3.75rem);
+  line-height: 0.92;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-primary);
+  text-shadow: 0 0 24px rgba(212, 167, 75, 0.18);
+}
+
+/* Responsive Typography Scale */
+@media (max-width: 768px) {
+  .stat-number {
+    font-size: 3rem;
+  }
+}
