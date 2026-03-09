@@ -29,7 +29,7 @@ export default function GiScrollSection() {
       animKey="gi"
       roundedTop={false}
       scrollHeightVh={300}
-      lockScrollPixels={1500}
+      lockScrollPixels={1300}
       lockUntilComplete
     />
   );

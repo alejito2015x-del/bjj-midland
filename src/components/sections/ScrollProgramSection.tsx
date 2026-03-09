@@ -9,6 +9,7 @@ import {
 } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 // Coordinates scroll lock across multiple scrub sections on the page.
 let activeScrollScrubOwner: string | null = null;
@@ -17,6 +18,8 @@ interface ScrollProgramSectionProps {
   sectionId?: string;
   navFocusKey?: string;
   instantOverlay?: boolean;
+  disableExitPin?: boolean;
+  pretitle?: string;
   videoSrc?: string;
   imageFrames?: string[];
   title: string;
@@ -66,6 +69,8 @@ export default function ScrollProgramSection({
   sectionId,
   navFocusKey,
   instantOverlay = false,
+  disableExitPin = false,
+  pretitle,
   videoSrc,
   imageFrames,
   title,
@@ -216,16 +221,24 @@ export default function ScrollProgramSection({
     imageFrames.forEach((src, index) => {
       const img = new window.Image();
       img.decoding = "async";
-      img.src = src;
 
-      img.onload = () => {
+      const handleLoaded = () => {
         if (cancelled) return;
+        if (loadedFramesRef.current[index] === img) return;
         loadedFramesRef.current[index] = img;
 
         if (index === 0 || index === currentFrameRef.current) {
           scheduleCanvasDraw(currentFrameRef.current);
         }
       };
+
+      img.onload = handleLoaded;
+      img.src = src;
+
+      // Cached images may already be complete by the time handlers run.
+      if (img.complete && img.naturalWidth > 0) {
+        handleLoaded();
+      }
     });
 
     return () => {
@@ -238,16 +251,32 @@ export default function ScrollProgramSection({
     };
   }, [hasImageSequence, imageFrames, scheduleCanvasDraw]);
 
-  // Keep canvas sharp on viewport resizes.
+  // Keep canvas sharp on layout/viewport changes and ensure first frame
+  // paints after hydration when canvas dimensions are finally non-zero.
   useEffect(() => {
     if (!hasImageSequence) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const onResize = () => scheduleCanvasDraw(currentFrameRef.current);
-    window.addEventListener("resize", onResize);
-    onResize();
+    const redrawCurrentFrame = () => {
+      scheduleCanvasDraw(currentFrameRef.current);
+    };
+
+    const observer = new ResizeObserver(() => {
+      redrawCurrentFrame();
+    });
+    observer.observe(canvas);
+
+    // Two phased draws help when hydration/layout settles over multiple frames.
+    const rafA = requestAnimationFrame(redrawCurrentFrame);
+    const rafB = requestAnimationFrame(() => {
+      requestAnimationFrame(redrawCurrentFrame);
+    });
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      observer.disconnect();
+      cancelAnimationFrame(rafA);
+      cancelAnimationFrame(rafB);
     };
   }, [hasImageSequence, scheduleCanvasDraw]);
 
@@ -282,10 +311,15 @@ export default function ScrollProgramSection({
         entryScale.set(0.98 + 0.02 * Math.min(1, Math.max(0, rawEntry)));
       }
 
-      // Exit: counteracts the natural upward drift once sticky breaks
-      const rawExit = 1 - rect.bottom / vh;
-      const exitFrac = Math.min(1, Math.max(0, rawExit));
-      exitY.set(`${exitFrac * 100}vh`);
+      // Exit: counteracts the natural upward drift once sticky breaks.
+      // Can be disabled for sections that should hand off immediately.
+      if (disableExitPin) {
+        exitY.set("0vh");
+      } else {
+        const rawExit = 1 - rect.bottom / vh;
+        const exitFrac = Math.min(1, Math.max(0, rawExit));
+        exitY.set(`${exitFrac * 100}vh`);
+      }
     };
 
     window.addEventListener("scroll", update, { passive: true });
@@ -296,7 +330,7 @@ export default function ScrollProgramSection({
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [scrollYProgress, entryOpacity, entryScale, exitY, instantOverlay]);
+  }, [scrollYProgress, entryOpacity, entryScale, exitY, instantOverlay, disableExitPin]);
 
   // ── Lock mechanism: overflow:hidden + virtual scroll via wheel ────────────
   useEffect(() => {
@@ -355,29 +389,23 @@ export default function ScrollProgramSection({
       window.scrollTo({ top: targetTop, behavior: "instant" as ScrollBehavior });
     };
 
-    const getProgress = () => {
-      const rect  = container.getBoundingClientRect();
-      const range = container.offsetHeight - window.innerHeight;
-      return range > 0 ? Math.min(1, Math.max(0, -rect.top / range)) : 0;
-    };
-
     const shouldCaptureSection = () => {
       const rect = container.getBoundingClientRect();
       const margin = 80;
-      const result = rect.top <= margin && rect.bottom > window.innerHeight;
-      console.log(`[LOCK:${animKey}] shouldCapture`, { top: Math.round(rect.top), bottom: Math.round(rect.bottom), vh: window.innerHeight, result });
-      return result;
+      return rect.top <= margin && rect.bottom >= window.innerHeight;
     };
 
     const tryStartLock = (deltaY: number) => {
       if (activeScrollScrubOwner && activeScrollScrubOwner !== animKey) {
-        console.log(`[LOCK:${animKey}] blocked — owner is ${activeScrollScrubOwner}`);
         return false;
       }
       if (!shouldCaptureSection()) return false;
 
-      const currentProgress = getProgress();
-      console.log(`[LOCK:${animKey}] tryStartLock`, { deltaY, currentProgress });
+      const rect  = container.getBoundingClientRect();
+      const range = container.offsetHeight - window.innerHeight;
+      const currentProgress = range > 0
+        ? Math.min(1, Math.max(0, -rect.top / range))
+        : 0;
 
       if (deltaY > 0 && currentProgress < 0.995) {
         return lockScroll(currentProgress);
@@ -422,10 +450,7 @@ export default function ScrollProgramSection({
       }
     };
 
-    const onWheel = (e: WheelEvent) => {
-      console.log(`[LOCK:${animKey}] wheel`, { deltaY: e.deltaY, isLocked });
-      handleDelta(e.deltaY, e);
-    };
+    const onWheel = (e: WheelEvent) => handleDelta(e.deltaY, e);
 
     const onTouchStart = (e: TouchEvent) => {
       lastTouchY = e.touches[0]?.clientY ?? null;
@@ -456,18 +481,6 @@ export default function ScrollProgramSection({
     window.addEventListener("touchcancel", onTouchEnd);
     window.addEventListener("keydown", onKeyDown);
 
-    // Auto-start lock on mount if the user is already inside this section.
-    // This handles the race where the user scrolled in before JS finished loading.
-    {
-      const initProgress = getProgress();
-      const inSection = shouldCaptureSection();
-      console.log(`[LOCK:${animKey}] mounted`, { initProgress, inSection, scrollY: window.scrollY });
-      if (inSection && initProgress > 0.005 && initProgress < 0.995) {
-        console.log(`[LOCK:${animKey}] auto-locking at`, initProgress);
-        lockScroll(initProgress);
-      }
-    }
-
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
@@ -481,6 +494,8 @@ export default function ScrollProgramSection({
 
   // Scroll hint fades out early
   const hintOpacity = useTransform(scrollYProgress, [0, 0.04], [1, 0]);
+  const pretitleOpacity = useTransform(scrollYProgress, [0, 0.14, 0.2], [1, 1, 0]);
+  const pretitleY = useTransform(scrollYProgress, [0, 0.2], [0, -12]);
 
   // ── Text reveal ranges — compact so text appears quickly ────────────────────
   const titleRange:       [number, number] = [0, 0.05];
@@ -519,16 +534,33 @@ export default function ScrollProgramSection({
       >
         {/* Background media */}
         {hasImageSequence ? (
-          <canvas
-            ref={canvasRef}
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-            }}
-          />
+          <>
+            {imageFrames?.[0] ? (
+              <Image
+                src={imageFrames[0]}
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="100vw"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  objectFit: "cover",
+                  objectPosition: "center",
+                }}
+              />
+            ) : null}
+            <canvas
+              ref={canvasRef}
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          </>
         ) : (
           <video
             ref={videoRef}
@@ -549,6 +581,38 @@ export default function ScrollProgramSection({
 
         {/* Overlay */}
         <div style={{ position: "absolute", inset: 0, background: overlayGradient }} />
+
+        {pretitle ? (
+          <motion.div
+            style={{
+              position: "absolute",
+              top: "clamp(5.5rem, 9vh, 7rem)",
+              left: "50%",
+              translateX: "-50%",
+              zIndex: 12,
+              padding: "0.35rem 0.9rem",
+              border: "1px solid rgba(212,167,75,0.35)",
+              background: "rgba(0,0,0,0.42)",
+              backdropFilter: "blur(3px)",
+              opacity: pretitleOpacity,
+              y: pretitleY,
+            }}
+          >
+            <span
+              style={{
+                color: "#D4A74B",
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(1.05rem, 2.2vw, 1.5rem)",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                whiteSpace: "nowrap",
+                textShadow: "0 0 18px rgba(0,0,0,0.35)",
+              }}
+            >
+              {pretitle}
+            </span>
+          </motion.div>
+        ) : null}
 
         {/* Content */}
         <div

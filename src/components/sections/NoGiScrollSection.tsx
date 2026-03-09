@@ -22,11 +22,12 @@ export default function NoGiScrollSection() {
       ctaText="View NO-GI Schedule"
       ctaHref="/?scheduleFilter=bjj-nogi#schedule"
       align="right"
+      instantOverlay
       overlayGradient="linear-gradient(225deg, rgba(0,0,0,0.56) 0%, rgba(0,0,0,0.30) 58%, rgba(0,0,0,0.12) 100%)"
       animKey="nogi"
-      roundedTop={true}
+      roundedTop={false}
       scrollHeightVh={300}
-      lockScrollPixels={1900}
+      lockScrollPixels={1300}
       lockUntilComplete
     />
   );

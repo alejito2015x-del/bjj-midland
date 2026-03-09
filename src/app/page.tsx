@@ -9,10 +9,12 @@ import CTA from "@/components/sections/CTA";
 import Testimonials from "@/components/sections/Testimonials";
 import InstagramFeed from "@/components/sections/InstagramFeed";
 import SectionReveal from "@/components/sections/SectionReveal";
+import ScrollReset from "@/components/layout/ScrollReset";
 
 export default function Home() {
   return (
     <>
+      <ScrollReset />
       <Navbar />
       <main>
         {/* Hero stays pinned while BJJ GI card rises over it */}

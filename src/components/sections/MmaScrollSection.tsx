@@ -22,11 +22,12 @@ export default function MmaScrollSection() {
       ctaText="View MMA Schedule"
       ctaHref="/?scheduleFilter=mma#schedule"
       align="left"
+      instantOverlay
       overlayGradient="linear-gradient(135deg, rgba(0,0,0,0.56) 0%, rgba(0,0,0,0.30) 58%, rgba(0,0,0,0.12) 100%)"
       animKey="mma"
-      roundedTop={true}
+      roundedTop={false}
       scrollHeightVh={300}
-      lockScrollPixels={1900}
+      lockScrollPixels={1300}
       lockUntilComplete
     />
   );
