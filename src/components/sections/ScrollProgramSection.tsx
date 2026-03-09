@@ -16,6 +16,7 @@ let activeScrollScrubOwner: string | null = null;
 interface ScrollProgramSectionProps {
   sectionId?: string;
   navFocusKey?: string;
+  instantOverlay?: boolean;
   videoSrc?: string;
   imageFrames?: string[];
   title: string;
@@ -64,6 +65,7 @@ function Reveal({
 export default function ScrollProgramSection({
   sectionId,
   navFocusKey,
+  instantOverlay = false,
   videoSrc,
   imageFrames,
   title,
@@ -271,9 +273,14 @@ export default function ScrollProgramSection({
       }
 
       // Entry: 0 = container top at viewport bottom → 1 = at viewport top
-      const rawEntry = 1 - rect.top / vh;
-      entryOpacity.set(0.82 + 0.18 * Math.min(1, Math.max(0, rawEntry)));
-      entryScale.set(0.98 + 0.02 * Math.min(1, Math.max(0, rawEntry)));
+      if (instantOverlay) {
+        entryOpacity.set(1);
+        entryScale.set(1);
+      } else {
+        const rawEntry = 1 - rect.top / vh;
+        entryOpacity.set(0.82 + 0.18 * Math.min(1, Math.max(0, rawEntry)));
+        entryScale.set(0.98 + 0.02 * Math.min(1, Math.max(0, rawEntry)));
+      }
 
       // Exit: counteracts the natural upward drift once sticky breaks
       const rawExit = 1 - rect.bottom / vh;
@@ -289,7 +296,7 @@ export default function ScrollProgramSection({
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [scrollYProgress, entryOpacity, entryScale, exitY]);
+  }, [scrollYProgress, entryOpacity, entryScale, exitY, instantOverlay]);
 
   // ── Lock mechanism: overflow:hidden + virtual scroll via wheel ────────────
   useEffect(() => {
