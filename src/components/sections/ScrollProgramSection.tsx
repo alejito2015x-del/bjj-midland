@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   motion,
   useMotionValue,
@@ -95,6 +95,7 @@ export default function ScrollProgramSection({
   const loadedFramesRef = useRef<(HTMLImageElement | null)[]>([]);
   const drawRafRef = useRef<number | null>(null);
   const currentFrameRef = useRef(0);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   // ── Manual scroll progress — computed directly from the DOM on every scroll
   //    event so it initialises correctly on first page load (no IntersectionObserver
@@ -106,6 +107,33 @@ export default function ScrollProgramSection({
 
   const hasImageSequence = !!imageFrames && imageFrames.length > 0;
   const frameCount = imageFrames?.length ?? 0;
+  const effectiveScrollHeightVh = isMobileViewport
+    ? Math.min(scrollHeightVh, 170)
+    : scrollHeightVh;
+  const effectiveScrollHeightCss = isMobileViewport
+    ? `${effectiveScrollHeightVh}svh`
+    : `${effectiveScrollHeightVh}vh`;
+  const effectiveLockUntilComplete = lockUntilComplete && !isMobileViewport;
+  const effectiveLockScrollPixels = isMobileViewport
+    ? Math.max(520, Math.round(lockScrollPixels * 0.55))
+    : lockScrollPixels;
+  const stickyViewportHeight = isMobileViewport ? "100svh" : "100vh";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
+    const apply = () => setIsMobileViewport(mediaQuery.matches);
+    apply();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", apply);
+      return () => mediaQuery.removeEventListener("change", apply);
+    }
+
+    mediaQuery.addListener(apply);
+    return () => mediaQuery.removeListener(apply);
+  }, []);
 
   // ── Video setup: load duration and show first frame ──────────────────────
   useEffect(() => {
@@ -334,7 +362,7 @@ export default function ScrollProgramSection({
 
   // ── Lock mechanism: overflow:hidden + virtual scroll via wheel ────────────
   useEffect(() => {
-    if (!lockUntilComplete) {
+    if (!effectiveLockUntilComplete) {
       isVirtualScrollLockedRef.current = false;
       return;
     }
@@ -437,7 +465,10 @@ export default function ScrollProgramSection({
       e.preventDefault();
 
       const prev = virtualProgress;
-      virtualProgress = Math.min(1, Math.max(0, prev + deltaY / lockScrollPixels));
+      virtualProgress = Math.min(
+        1,
+        Math.max(0, prev + deltaY / effectiveLockScrollPixels)
+      );
       scrollYProgress.set(virtualProgress);
 
       if (virtualProgress >= 0.999 && deltaY > 0) {
@@ -490,7 +521,7 @@ export default function ScrollProgramSection({
       window.removeEventListener("keydown", onKeyDown);
       if (isLocked) releaseLock();
     };
-  }, [animKey, lockScrollPixels, lockUntilComplete, scrollYProgress]);
+  }, [animKey, effectiveLockScrollPixels, effectiveLockUntilComplete, scrollYProgress]);
 
   // Scroll hint fades out early
   const hintOpacity = useTransform(scrollYProgress, [0, 0.04], [1, 0]);
@@ -513,13 +544,13 @@ export default function ScrollProgramSection({
       ref={containerRef}
       id={sectionId}
       data-programs-focus={navFocusKey}
-      style={{ height: `${scrollHeightVh}vh` }}
+      style={{ height: effectiveScrollHeightCss }}
     >
       <motion.div
         style={{
           position: "sticky",
           top: 0,
-          height: "100vh",
+          height: stickyViewportHeight,
           width: "100%",
           overflow: "hidden",
           background: "#0A0A0A",
@@ -620,19 +651,21 @@ export default function ScrollProgramSection({
             position: "absolute",
             inset: 0,
             display: "flex",
-            alignItems: "center",
-            justifyContent: isRight ? "flex-end" : "flex-start",
-            paddingLeft:  "clamp(1.5rem, 6vw, 6rem)",
-            paddingRight: "clamp(1.5rem, 6vw, 6rem)",
+            alignItems: isMobileViewport ? "flex-end" : "center",
+            justifyContent: isMobileViewport ? "flex-start" : isRight ? "flex-end" : "flex-start",
+            paddingTop: isMobileViewport ? "clamp(5.75rem, 14svh, 8rem)" : "0",
+            paddingBottom: isMobileViewport ? "clamp(1.8rem, 5svh, 3rem)" : "0",
+            paddingLeft: isMobileViewport ? "clamp(1rem, 4.8vw, 1.6rem)" : "clamp(1.5rem, 6vw, 6rem)",
+            paddingRight: isMobileViewport ? "clamp(1rem, 4.8vw, 1.6rem)" : "clamp(1.5rem, 6vw, 6rem)",
           }}
         >
           <div
             style={{
-              maxWidth: "520px",
+              maxWidth: isMobileViewport ? "100%" : "520px",
               width: "100%",
               display: "flex",
               flexDirection: "column",
-              gap: "clamp(0.9rem, 2vw, 1.5rem)",
+              gap: isMobileViewport ? "0.95rem" : "clamp(0.9rem, 2vw, 1.5rem)",
             }}
           >
             {/* Title */}
@@ -640,7 +673,9 @@ export default function ScrollProgramSection({
               <h3
                 style={{
                   fontFamily: "var(--font-display)",
-                  fontSize: "clamp(3.5rem, 8vw, 6rem)",
+                  fontSize: isMobileViewport
+                    ? "clamp(2.15rem, 13vw, 3.1rem)"
+                    : "clamp(3.5rem, 8vw, 6rem)",
                   color: "#fff",
                   lineHeight: 0.92,
                   letterSpacing: "0.01em",
@@ -655,7 +690,9 @@ export default function ScrollProgramSection({
               <p
                 style={{
                   color: "#D4A74B",
-                  fontSize: "clamp(1.1rem, 2.5vw, 1.5rem)",
+                  fontSize: isMobileViewport
+                    ? "clamp(1rem, 5vw, 1.25rem)"
+                    : "clamp(1.1rem, 2.5vw, 1.5rem)",
                   fontWeight: 600,
                   lineHeight: 1.3,
                 }}
@@ -669,7 +706,9 @@ export default function ScrollProgramSection({
               <p
                 style={{
                   color: "rgba(255,255,255,0.82)",
-                  fontSize: "clamp(0.9rem, 1.7vw, 1.1rem)",
+                  fontSize: isMobileViewport
+                    ? "clamp(0.92rem, 3.9vw, 1rem)"
+                    : "clamp(0.9rem, 1.7vw, 1.1rem)",
                   lineHeight: 1.65,
                 }}
               >
@@ -694,7 +733,13 @@ export default function ScrollProgramSection({
             <Reveal progress={scrollYProgress} range={ctaRange} yOffset={20}>
               <Link
                 href={ctaHref}
-                className="inline-flex items-center gap-2 btn-predator btn-gold px-10 py-5 text-black/95"
+                className="inline-flex items-center gap-2 btn-predator btn-gold text-black/95"
+                style={{
+                  fontSize: isMobileViewport ? "0.88rem" : "1.05rem",
+                  paddingInline: isMobileViewport ? "1.35rem" : "2.5rem",
+                  paddingBlock: isMobileViewport ? "0.9rem" : "1.25rem",
+                  letterSpacing: "0.1em",
+                }}
               >
                 <span>{ctaText}</span>
                 <ArrowUpRight className="w-4 h-4" />
@@ -707,7 +752,7 @@ export default function ScrollProgramSection({
         <motion.div
           style={{
             position: "absolute",
-            bottom: "36px",
+            bottom: isMobileViewport ? "22px" : "36px",
             left: "50%",
             translateX: "-50%",
             opacity: hintOpacity,

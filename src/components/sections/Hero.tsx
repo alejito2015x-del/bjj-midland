@@ -67,18 +67,29 @@ export default function Hero() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center gap-8 w-full text-center" style={{ maxWidth: "1280px", marginInline: "auto", paddingTop: "8rem", paddingBottom: "0" }}>
+      <div
+        className="relative z-10 flex flex-col items-center justify-center gap-6 md:gap-8 w-full text-center px-4 sm:px-6"
+        style={{
+          maxWidth: "1280px",
+          marginInline: "auto",
+          paddingTop: "clamp(5.5rem, 16vw, 8rem)",
+          paddingBottom: "0",
+        }}
+      >
 
         {/* Headline */}
-        <div className="flex flex-col items-center gap-1" style={{ transform: "translateY(55px)" }}>
-          <h1 className="text-[clamp(2.5rem,7vw,6rem)] font-normal leading-none tracking-tight text-white" style={{ marginTop: "195px" }}>
+        <div className="flex flex-col items-center gap-1 md:gap-2">
+          <h1 className="text-[clamp(2.2rem,9vw,6rem)] font-normal leading-none tracking-tight text-white">
             MIDLAND
           </h1>
-          <div className="relative w-full flex justify-center" style={{ height: "2em", marginTop: "15px" }}>
+          <div
+            className="relative w-full flex justify-center"
+            style={{ height: "clamp(2.8rem, 11vw, 4.5rem)", marginTop: "0.25rem" }}
+          >
             {titles.map((title, index) => (
               <motion.span
                 key={index}
-                className="absolute whitespace-nowrap text-[clamp(1.8rem,4vw,3.8rem)] font-normal tracking-tight"
+                className="absolute text-center px-2 sm:px-0 whitespace-nowrap text-[clamp(1.35rem,6.6vw,3.8rem)] font-normal tracking-tight"
                 style={{
                   color: "#D4A74B",
                   fontFamily: "var(--font-display)",
@@ -97,14 +108,14 @@ export default function Hero() {
           </div>
         </div>
 
-        <div style={{ height: "20px" }} />
+        <div style={{ height: "8px" }} />
 
         {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-7 mt-16"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-7 mt-8 sm:mt-12 md:mt-16"
         >
           <Link
             href="/contact"
@@ -113,8 +124,8 @@ export default function Hero() {
             <InteractiveHoverButton
               text="Start Your Journey"
               variant="gold"
-              className="text-base tracking-[0.18em]"
-              style={{ paddingInline: "2.5rem", paddingBlock: "1.1rem" }}
+              className="text-sm sm:text-base tracking-[0.14em] sm:tracking-[0.18em]"
+              style={{ paddingInline: "clamp(1.4rem, 8vw, 2.5rem)", paddingBlock: "clamp(0.8rem, 3.5vw, 1.1rem)" }}
             />
           </Link>
           <InteractiveHoverButton
@@ -123,8 +134,8 @@ export default function Hero() {
             text="View Schedule"
             variant="outline"
             icon={<Play className="w-5 h-5" />}
-            className="text-base tracking-[0.18em]"
-            style={{ paddingInline: "2.5rem", paddingBlock: "1.1rem" }}
+            className="text-sm sm:text-base tracking-[0.14em] sm:tracking-[0.18em]"
+            style={{ paddingInline: "clamp(1.4rem, 8vw, 2.5rem)", paddingBlock: "clamp(0.8rem, 3.5vw, 1.1rem)" }}
           />
         </motion.div>
       </div>
@@ -137,7 +148,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-5 sm:bottom-8 left-1/2 -translate-x-1/2"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

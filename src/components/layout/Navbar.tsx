@@ -129,7 +129,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 py-3 transition-all duration-300 ${scrolled ? "bg-black/90 backdrop-blur-sm shadow-lg" : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 py-2.5 md:py-3 transition-all duration-300 ${scrolled ? "bg-black/90 backdrop-blur-sm shadow-lg" : "bg-transparent"
         }`}
     >
       <div
@@ -143,7 +143,7 @@ export default function Navbar() {
             onClick={(e) => handleNavClick(e, "/#hero")}
             className="relative z-50 flex items-center gap-2 md:gap-3 group"
           >
-            <div className="relative w-16 h-16 md:w-16 md:h-16 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-[1.02]">
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-[1.02]">
               <Image
                 src="/images/logo-nav-v5.png"
                 alt="Midland BJJ & MMA"
@@ -249,7 +249,7 @@ export default function Navbar() {
               </div>
             </div>
 
-            <nav className="relative h-full flex flex-col items-center justify-center px-6">
+            <nav className="relative h-full flex flex-col items-center justify-center px-6 pt-[max(env(safe-area-inset-top),1rem)] pb-[max(env(safe-area-inset-bottom),1rem)]">
               <div className="flex flex-col items-center gap-2">
                 {NAV_LINKS.map((link, index) => (
                   <motion.div
@@ -262,7 +262,7 @@ export default function Navbar() {
                     <Link
                       href={link.href}
                       onClick={(e) => handleNavClick(e, link.href)}
-                      className="text-white text-4xl md:text-5xl hover:text-gold transition-colors duration-300 uppercase tracking-tight"
+                      className="text-white text-3xl sm:text-4xl md:text-5xl hover:text-gold transition-colors duration-300 uppercase tracking-tight"
                       style={{ fontFamily: "var(--font-display)" }}
                     >
                       {link.name}
@@ -282,7 +282,7 @@ export default function Navbar() {
                 <Link
                   href="/contact"
                   onClick={(e) => { e.preventDefault(); setIsOpen(false); openModal("trial"); }}
-                  className="btn-predator btn-gold px-10 py-5 text-lg"
+                  className="btn-predator btn-gold px-8 py-4 text-base sm:text-lg"
                 >
                   START FREE TRIAL
                 </Link>
@@ -291,7 +291,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 text-gold"
                 >
                   <Phone className="w-5 h-5" />
-                  <span className="text-lg tracking-wider">(432) 555-0123</span>
+                  <span className="text-base sm:text-lg tracking-wider">(432) 555-0123</span>
                 </a>
               </motion.div>
 
