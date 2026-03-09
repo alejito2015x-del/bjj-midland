@@ -16,6 +16,9 @@ const NAV_LINKS = [
   { name: "CONTACT", href: "/contact" },
 ];
 const NAV_SCROLL_OFFSET = 96;
+const HERO_HASH = "#hero";
+const PROGRAMS_HASH = "#programs";
+const PROGRAMS_FOCUS_PROGRESS = 0.3;
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,12 +26,47 @@ export default function Navbar() {
   const pathname = usePathname();
   const { openModal } = useRegistrationModal();
 
+  const scrollToProgramsFocus = useCallback(() => {
+    const target =
+      document.querySelector<HTMLElement>('[data-programs-focus="gi"]') ??
+      document.querySelector<HTMLElement>(PROGRAMS_HASH);
+
+    if (!target) return false;
+
+    const rect = target.getBoundingClientRect();
+    const absTop = window.scrollY + rect.top;
+    const range = Math.max(0, target.offsetHeight - window.innerHeight);
+    const targetTop =
+      range > 0 ? absTop + range * PROGRAMS_FOCUS_PROGRESS : absTop - NAV_SCROLL_OFFSET;
+
+    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    if (window.location.hash !== PROGRAMS_HASH) {
+      window.history.replaceState(null, "", PROGRAMS_HASH);
+    }
+    return true;
+  }, []);
+
   const scrollToHashWithOffset = useCallback((hash: string) => {
+    if (hash === HERO_HASH) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (window.location.hash !== HERO_HASH) {
+        window.history.replaceState(null, "", HERO_HASH);
+      }
+      return;
+    }
+
+    if (hash === PROGRAMS_HASH && scrollToProgramsFocus()) {
+      return;
+    }
+
     const el = document.querySelector(hash);
     if (!el) return;
-    const targetTop = el.getBoundingClientRect().top + window.scrollY - NAV_SCROLL_OFFSET;
+    const targetTop = Math.max(0, el.getBoundingClientRect().top + window.scrollY - NAV_SCROLL_OFFSET);
     window.scrollTo({ top: targetTop, behavior: "smooth" });
-  }, []);
+    if (window.location.hash !== hash) {
+      window.history.replaceState(null, "", hash);
+    }
+  }, [scrollToProgramsFocus]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,13 +95,25 @@ export default function Navbar() {
   );
 
   useEffect(() => {
-    if (pathname !== "/" || window.location.hash !== "#schedule") return;
+    if (pathname !== "/" || !window.location.hash) return;
 
     const raf = window.requestAnimationFrame(() => {
-      scrollToHashWithOffset("#schedule");
+      scrollToHashWithOffset(window.location.hash);
     });
 
     return () => window.cancelAnimationFrame(raf);
+  }, [pathname, scrollToHashWithOffset]);
+
+  useEffect(() => {
+    if (pathname !== "/") return;
+
+    const onHashChange = () => {
+      if (!window.location.hash) return;
+      scrollToHashWithOffset(window.location.hash);
+    };
+
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
   }, [pathname, scrollToHashWithOffset]);
 
   useEffect(() => {

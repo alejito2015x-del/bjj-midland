@@ -10,6 +10,8 @@ const giFrames = Array.from({ length: 70 }, (_, index) => {
 export default function GiScrollSection() {
   return (
     <ScrollProgramSection
+      sectionId="programs"
+      navFocusKey="gi"
       imageFrames={giFrames}
       title="BJJ GI"
       subtitle="Technique, control and precision"

@@ -16,6 +16,8 @@ import Link from "next/link";
 let activeScrollScrubOwner: string | null = null;
 
 interface ScrollProgramSectionProps {
+  sectionId?: string;
+  navFocusKey?: string;
   videoSrc?: string;
   imageFrames?: string[];
   title: string;
@@ -62,6 +64,8 @@ function Reveal({
 }
 
 export default function ScrollProgramSection({
+  sectionId,
+  navFocusKey,
   videoSrc,
   imageFrames,
   title,
@@ -255,17 +259,20 @@ export default function ScrollProgramSection({
     };
   }, [hasImageSequence, imageFrames, scheduleCanvasDraw]);
 
-  // Keep canvas sharp on viewport resizes.
+  // Keep canvas sharp on viewport resizes — use ResizeObserver so the first
+  // draw fires only once the canvas has real CSS dimensions (fixes black canvas
+  // on initial load when clientWidth/clientHeight are still 0).
   useEffect(() => {
     if (!hasImageSequence) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const onResize = () => scheduleCanvasDraw(currentFrameRef.current);
-    window.addEventListener("resize", onResize);
-    onResize();
+    const observer = new ResizeObserver(() => {
+      scheduleCanvasDraw(currentFrameRef.current);
+    });
+    observer.observe(canvas);
 
-    return () => {
-      window.removeEventListener("resize", onResize);
-    };
+    return () => observer.disconnect();
   }, [hasImageSequence, scheduleCanvasDraw]);
 
   // ── Lock mechanism: overflow:hidden + virtual scroll via wheel ────────────
@@ -274,6 +281,8 @@ export default function ScrollProgramSection({
       isVirtualScrollLockedRef.current = false;
       return;
     }
+    // Clean up stale module-level lock on mount (handles hot-reload edge case)
+    if (activeScrollScrubOwner === animKey) activeScrollScrubOwner = null;
     const container = containerRef.current;
     if (!container) return;
 
@@ -436,7 +445,12 @@ export default function ScrollProgramSection({
   const isRight = align === "right";
 
   return (
-    <div ref={containerRef} style={{ height: `${scrollHeightVh}vh` }}>
+    <div
+      ref={containerRef}
+      id={sectionId}
+      data-programs-focus={navFocusKey}
+      style={{ height: `${scrollHeightVh}vh` }}
+    >
       <motion.div
         style={{
           position: "sticky",

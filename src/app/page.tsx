@@ -3,9 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Programs from "@/components/sections/Programs";
 import HeroPinWrapper from "@/components/sections/HeroPinWrapper";
-import GiScrollSection from "@/components/sections/GiScrollSection";
-import NoGiScrollSection from "@/components/sections/NoGiScrollSection";
-import MmaScrollSection from "@/components/sections/MmaScrollSection";
+import ScrollSections from "@/components/sections/ScrollSections";
 import SchedulePoster from "@/components/sections/SchedulePoster";
 import CTA from "@/components/sections/CTA";
 import Testimonials from "@/components/sections/Testimonials";
@@ -20,14 +18,8 @@ export default function Home() {
         {/* Hero stays pinned while BJJ GI card rises over it */}
         <HeroPinWrapper />
 
-        {/* GI scroll-scrub section — rises over Hero with rounded top corners */}
-        <GiScrollSection />
-
-        {/* No-GI rises over GI */}
-        <NoGiScrollSection />
-
-        {/* MMA rises over No-GI */}
-        <MmaScrollSection />
+        {/* Scroll-scrub sections — client-only to avoid SSR hydration issues */}
+        <ScrollSections />
 
         {/* MMA, Kids, Veteran, Location */}
         <Programs />
