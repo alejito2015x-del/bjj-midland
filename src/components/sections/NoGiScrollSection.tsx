@@ -25,7 +25,8 @@ export default function NoGiScrollSection() {
       overlayGradient="linear-gradient(225deg, rgba(0,0,0,0.56) 0%, rgba(0,0,0,0.30) 58%, rgba(0,0,0,0.12) 100%)"
       animKey="nogi"
       roundedTop={true}
-      scrollHeightVh={430}
+      scrollHeightVh={300}
+      lockScrollPixels={1900}
       lockUntilComplete
     />
   );

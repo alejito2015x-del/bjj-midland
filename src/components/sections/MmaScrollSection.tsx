@@ -25,7 +25,8 @@ export default function MmaScrollSection() {
       overlayGradient="linear-gradient(135deg, rgba(0,0,0,0.56) 0%, rgba(0,0,0,0.30) 58%, rgba(0,0,0,0.12) 100%)"
       animKey="mma"
       roundedTop={true}
-      scrollHeightVh={430}
+      scrollHeightVh={300}
+      lockScrollPixels={1900}
       lockUntilComplete
     />
   );

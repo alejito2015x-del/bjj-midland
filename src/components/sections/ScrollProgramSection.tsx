@@ -4,8 +4,6 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   motion,
   useMotionValue,
-  useMotionValueEvent,
-  useScroll,
   useTransform,
   MotionValue,
 } from "framer-motion";
@@ -80,7 +78,7 @@ export default function ScrollProgramSection({
   roundedTop = false,
   scrollHeightVh = 350,
   lockUntilComplete = true,
-  lockScrollPixels = 5000,
+  lockScrollPixels = 2200,
 }: ScrollProgramSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -91,37 +89,16 @@ export default function ScrollProgramSection({
   const drawRafRef = useRef<number | null>(null);
   const currentFrameRef = useRef(0);
 
-  const { scrollYProgress: nativeScrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
+  // ── Manual scroll progress — computed directly from the DOM on every scroll
+  //    event so it initialises correctly on first page load (no IntersectionObserver
+  //    timing dependency like Framer Motion's useScroll has on cold loads). ───────
   const scrollYProgress = useMotionValue(0);
-
-  // ── Entry animation: fade + scale as section rises from below viewport ────
-  const { scrollYProgress: entryProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "start start"],
-  });
-  const entryOpacity = useTransform(entryProgress, [0, 1], [0.82, 1]);
-  const entryScale   = useTransform(entryProgress, [0, 1], [0.98, 1]);
-
-  // ── Exit pin: counteracts the natural upward drift once sticky breaks,
-  //    keeping this section visually static while the next one rises over it ──
-  const { scrollYProgress: exitProgress } = useScroll({
-    target: containerRef,
-    offset: ["end end", "end start"],
-  });
-  // sticky drifts -1px per 1px of scroll → translateY(+scrolled) cancels it
-  const exitY = useTransform(exitProgress, [0, 1], ["0vh", "100vh"]);
+  const entryOpacity    = useMotionValue(0.82);
+  const entryScale      = useMotionValue(0.98);
+  const exitY           = useMotionValue("0vh");
 
   const hasImageSequence = !!imageFrames && imageFrames.length > 0;
   const frameCount = imageFrames?.length ?? 0;
-
-  useMotionValueEvent(nativeScrollYProgress, "change", (value) => {
-    if (!isVirtualScrollLockedRef.current) {
-      scrollYProgress.set(value);
-    }
-  });
 
   // ── Video setup: load duration and show first frame ──────────────────────
   useEffect(() => {
@@ -179,7 +156,7 @@ export default function ScrollProgramSection({
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
-    const scale = Math.min(cssWidth / frame.naturalWidth, cssHeight / frame.naturalHeight);
+    const scale = Math.max(cssWidth / frame.naturalWidth, cssHeight / frame.naturalHeight);
     const drawWidth = frame.naturalWidth * scale;
     const drawHeight = frame.naturalHeight * scale;
     const offsetX = (cssWidth - drawWidth) / 2;
@@ -259,21 +236,60 @@ export default function ScrollProgramSection({
     };
   }, [hasImageSequence, imageFrames, scheduleCanvasDraw]);
 
-  // Keep canvas sharp on viewport resizes — use ResizeObserver so the first
-  // draw fires only once the canvas has real CSS dimensions (fixes black canvas
-  // on initial load when clientWidth/clientHeight are still 0).
+  // Keep canvas sharp on viewport resizes.
   useEffect(() => {
     if (!hasImageSequence) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
 
-    const observer = new ResizeObserver(() => {
-      scheduleCanvasDraw(currentFrameRef.current);
-    });
-    observer.observe(canvas);
+    const onResize = () => scheduleCanvasDraw(currentFrameRef.current);
+    window.addEventListener("resize", onResize);
+    onResize();
 
-    return () => observer.disconnect();
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
   }, [hasImageSequence, scheduleCanvasDraw]);
+
+  // ── Manual scroll + entry/exit tracker ───────────────────────────────────
+  // Replaces Framer Motion's useScroll (which relies on IntersectionObserver
+  // and does not fire an initial "change" event on first page load, causing the
+  // scroll lock and text reveals to start in the wrong state).
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      const h    = el.offsetHeight;
+      const vh   = window.innerHeight;
+
+      // Main scrub progress: 0 when container top = viewport top,
+      //                       1 when container bottom = viewport bottom.
+      if (!isVirtualScrollLockedRef.current) {
+        const range = h - vh;
+        const p = range > 0 ? Math.min(1, Math.max(0, -rect.top / range)) : 0;
+        scrollYProgress.set(p);
+      }
+
+      // Entry: 0 = container top at viewport bottom → 1 = at viewport top
+      const rawEntry = 1 - rect.top / vh;
+      entryOpacity.set(0.82 + 0.18 * Math.min(1, Math.max(0, rawEntry)));
+      entryScale.set(0.98 + 0.02 * Math.min(1, Math.max(0, rawEntry)));
+
+      // Exit: counteracts the natural upward drift once sticky breaks
+      const rawExit = 1 - rect.bottom / vh;
+      const exitFrac = Math.min(1, Math.max(0, rawExit));
+      exitY.set(`${exitFrac * 100}vh`);
+    };
+
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update(); // Initialise immediately — no timing dependency
+
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [scrollYProgress, entryOpacity, entryScale, exitY]);
 
   // ── Lock mechanism: overflow:hidden + virtual scroll via wheel ────────────
   useEffect(() => {
@@ -281,8 +297,6 @@ export default function ScrollProgramSection({
       isVirtualScrollLockedRef.current = false;
       return;
     }
-    // Clean up stale module-level lock on mount (handles hot-reload edge case)
-    if (activeScrollScrubOwner === animKey) activeScrollScrubOwner = null;
     const container = containerRef.current;
     if (!container) return;
 
@@ -297,6 +311,8 @@ export default function ScrollProgramSection({
       isVirtualScrollLockedRef.current = false;
       html.style.overflow = "";
       html.style.paddingRight = "";
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
       if (activeScrollScrubOwner === animKey) activeScrollScrubOwner = null;
     };
 
@@ -310,7 +326,11 @@ export default function ScrollProgramSection({
       virtualProgress = startProgress;
       scrollYProgress.set(startProgress);
       html.style.overflow = "hidden";
-      if (scrollbarWidth > 0) html.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.style.overflow = "hidden";
+      if (scrollbarWidth > 0) {
+        html.style.paddingRight = `${scrollbarWidth}px`;
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
       return true;
     };
 
@@ -328,29 +348,36 @@ export default function ScrollProgramSection({
       window.scrollTo({ top: targetTop, behavior: "instant" as ScrollBehavior });
     };
 
+    const getProgress = () => {
+      const rect  = container.getBoundingClientRect();
+      const range = container.offsetHeight - window.innerHeight;
+      return range > 0 ? Math.min(1, Math.max(0, -rect.top / range)) : 0;
+    };
+
     const shouldCaptureSection = () => {
       const rect = container.getBoundingClientRect();
       const margin = 80;
-      return rect.top <= margin && rect.bottom > window.innerHeight;
+      const result = rect.top <= margin && rect.bottom > window.innerHeight;
+      console.log(`[LOCK:${animKey}] shouldCapture`, { top: Math.round(rect.top), bottom: Math.round(rect.bottom), vh: window.innerHeight, result });
+      return result;
     };
 
     const tryStartLock = (deltaY: number) => {
       if (activeScrollScrubOwner && activeScrollScrubOwner !== animKey) {
+        console.log(`[LOCK:${animKey}] blocked — owner is ${activeScrollScrubOwner}`);
         return false;
       }
       if (!shouldCaptureSection()) return false;
 
-      const nativeProgress = Math.min(
-        1,
-        Math.max(0, nativeScrollYProgress.get())
-      );
+      const currentProgress = getProgress();
+      console.log(`[LOCK:${animKey}] tryStartLock`, { deltaY, currentProgress });
 
-      if (deltaY > 0 && nativeProgress < 0.995) {
-        return lockScroll(nativeProgress);
+      if (deltaY > 0 && currentProgress < 0.995) {
+        return lockScroll(currentProgress);
       }
 
-      if (deltaY < 0 && nativeProgress > 0.005) {
-        return lockScroll(nativeProgress);
+      if (deltaY < 0 && currentProgress > 0.005) {
+        return lockScroll(currentProgress);
       }
 
       return false;
@@ -388,7 +415,10 @@ export default function ScrollProgramSection({
       }
     };
 
-    const onWheel = (e: WheelEvent) => handleDelta(e.deltaY, e);
+    const onWheel = (e: WheelEvent) => {
+      console.log(`[LOCK:${animKey}] wheel`, { deltaY: e.deltaY, isLocked });
+      handleDelta(e.deltaY, e);
+    };
 
     const onTouchStart = (e: TouchEvent) => {
       lastTouchY = e.touches[0]?.clientY ?? null;
@@ -419,6 +449,18 @@ export default function ScrollProgramSection({
     window.addEventListener("touchcancel", onTouchEnd);
     window.addEventListener("keydown", onKeyDown);
 
+    // Auto-start lock on mount if the user is already inside this section.
+    // This handles the race where the user scrolled in before JS finished loading.
+    {
+      const initProgress = getProgress();
+      const inSection = shouldCaptureSection();
+      console.log(`[LOCK:${animKey}] mounted`, { initProgress, inSection, scrollY: window.scrollY });
+      if (inSection && initProgress > 0.005 && initProgress < 0.995) {
+        console.log(`[LOCK:${animKey}] auto-locking at`, initProgress);
+        lockScroll(initProgress);
+      }
+    }
+
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
@@ -428,7 +470,7 @@ export default function ScrollProgramSection({
       window.removeEventListener("keydown", onKeyDown);
       if (isLocked) releaseLock();
     };
-  }, [animKey, lockScrollPixels, lockUntilComplete, nativeScrollYProgress, scrollYProgress]);
+  }, [animKey, lockScrollPixels, lockUntilComplete, scrollYProgress]);
 
   // Scroll hint fades out early
   const hintOpacity = useTransform(scrollYProgress, [0, 0.04], [1, 0]);

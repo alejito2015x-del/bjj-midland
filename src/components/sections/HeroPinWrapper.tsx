@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { motion, useMotionValue } from "framer-motion";
 import Hero from "./Hero";
 
 /**
@@ -14,17 +14,39 @@ import Hero from "./Hero";
  *   - exitY compensates the natural upward drift (+1px per px of scroll)
  *     so Hero stays visually at top:0 during the full 100vh GI rise.
  *   - When GI reaches top:0 and sticks, it fully covers the Hero.
+ *
+ * Uses a manual scroll listener instead of Framer Motion's useScroll so the
+ * initial value is always computed correctly on first page load.
  */
 export default function HeroPinWrapper() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const exitY = useMotionValue("0vh");
 
-  const { scrollYProgress: exitProgress } = useScroll({
-    target: containerRef,
-    offset: ["end end", "end start"],
-  });
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-  // Cancels the -1px/px drift after sticky breaks → Hero stays at top:0
-  const exitY = useTransform(exitProgress, [0, 1], ["0vh", "100vh"]);
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      const vh   = window.innerHeight;
+
+      // exitProgress: 0 when container bottom = viewport bottom,
+      //               1 when container bottom = viewport top.
+      // Same as useScroll offset ["end end", "end start"].
+      const rawExit = 1 - rect.bottom / vh;
+      const frac    = Math.min(1, Math.max(0, rawExit));
+      exitY.set(`${frac * 100}vh`);
+    };
+
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update(); // Initialise immediately — correct on first load
+
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [exitY]);
 
   return (
     <div ref={containerRef} style={{ position: "relative", height: "200vh" }}>
