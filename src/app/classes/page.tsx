@@ -1,11 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { PROGRAMS, SCHEDULE, IMAGES } from "@/lib/constants";
+import { PROGRAMS, SCHEDULE } from "@/lib/constants";
 import { ArrowRight } from "lucide-react";
 
 const colorClasses = {
@@ -89,55 +88,6 @@ export default function ClassesPage() {
                 Find the perfect program for your goals. From traditional gi training to modern MMA.
               </p>
             </motion.div>
-          </div>
-        </section>
-
-        {/* Programs Section */}
-        <section className="py-20 bg-background-elevated">
-          <div className="max-w-7xl mx-auto px-6 md:px-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {PROGRAMS.map((program, index) => (
-                <motion.div
-                  key={program.id}
-                  id={program.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group"
-                >
-                  <div className="card-predator h-full overflow-hidden">
-                    <div className="relative h-56">
-                      <Image
-                        src={IMAGES[program.image as keyof typeof IMAGES] as string}
-                        alt={program.name}
-                        fill
-                        className="object-cover opacity-70 group-hover:opacity-90 transition-opacity duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background-card via-background-card/60 to-transparent" />
-                      <div
-                        className={`absolute top-4 left-4 px-4 py-2 ${
-                          colorClasses[program.color as keyof typeof colorClasses].bg
-                        } text-background font-bold uppercase text-xs tracking-wider`}
-                      >
-                        {program.shortName}
-                      </div>
-                    </div>
-                    <div className="p-8 text-center">
-                      <h3 className="text-2xl text-white mb-3 group-hover:text-gold transition-colors" style={{ fontFamily: 'var(--font-display)' }}>
-                        {program.name}
-                      </h3>
-                      <p className="text-text-secondary text-sm leading-relaxed mb-4">
-                        {program.description}
-                      </p>
-                      <p className={`text-sm font-semibold ${colorClasses[program.color as keyof typeof colorClasses].text}`}>
-                        {program.level} • {program.schedule}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
           </div>
         </section>
 

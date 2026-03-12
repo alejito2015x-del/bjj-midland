@@ -86,7 +86,9 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  /* clip instead of hidden: clips overflow without making html/body a scroll
+     container, which would force overflow-y:auto and break scroll lock */
+  overflow-x: clip;
 }
 
 body {
@@ -96,7 +98,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Display Headings - Bebas Neue */
@@ -209,6 +211,7 @@ img {
   background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
               linear-gradient(135deg, var(--gold-primary), transparent 50%, var(--gold-dark)) border-box;
 }
+
 
 .border-gradient-neon {
   border: 2px solid transparent;

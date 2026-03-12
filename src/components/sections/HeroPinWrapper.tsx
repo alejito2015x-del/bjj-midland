@@ -49,10 +49,20 @@ export default function HeroPinWrapper() {
   }, [exitY]);
 
   return (
-    <div ref={containerRef} style={{ position: "relative", height: "200vh" }}>
-      <motion.div style={{ position: "sticky", top: 0, y: exitY, zIndex: 0 }}>
+    <>
+      <div className="lg:hidden">
         <Hero />
-      </motion.div>
-    </div>
+      </div>
+
+      <div
+        ref={containerRef}
+        className="hidden lg:block"
+        style={{ position: "relative", height: "200vh" }}
+      >
+        <motion.div style={{ position: "sticky", top: 0, y: exitY, zIndex: 0 }}>
+          <Hero />
+        </motion.div>
+      </div>
+    </>
   );
 }

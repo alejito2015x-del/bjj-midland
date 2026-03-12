@@ -31,6 +31,7 @@ export default function GiScrollSection() {
       scrollHeightVh={300}
       lockScrollPixels={1300}
       lockUntilComplete
+      mobileImage="/images/bjj-gi-mobile.png"
     />
   );
 }

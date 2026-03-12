@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  motion,
   useMotionValue,
-  useTransform,
   MotionValue,
 } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
@@ -41,9 +39,16 @@ interface ScrollProgramSectionProps {
   lockUntilComplete?: boolean;
   /** Wheel delta pixels required to scrub 0→1 */
   lockScrollPixels?: number;
+  /** Override image shown in the mobile static card */
+  mobileImage?: string;
+  /** Override object-position for mobile static image */
+  mobileImagePosition?: string;
 }
 
-// Small helper — wraps a child in a motion.div driven by scroll progress
+// Small helper — wraps a child and animates it based on scroll progress.
+// Uses direct DOM manipulation (progress.on("change")) instead of Framer Motion's
+// useTransform + motion.div, which may not reconnect subscriptions correctly
+// after SSR hydration (causing animations to be stuck on first page load).
 function Reveal({
   progress,
   range,
@@ -55,13 +60,36 @@ function Reveal({
   children: React.ReactNode;
   yOffset?: number;
 }) {
-  const opacity = useTransform(progress, range, [0, 1]);
-  const y = useTransform(progress, range, [yOffset, 0]);
+  const ref = useRef<HTMLDivElement>(null);
+  // Keep latest range/yOffset in refs so the subscription closure stays current
+  const rangeRef  = useRef(range);
+  const offsetRef = useRef(yOffset);
+  rangeRef.current  = range;
+  offsetRef.current = yOffset;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const apply = (p: number) => {
+      const [r0, r1] = rangeRef.current;
+      const t = r1 > r0 ? Math.min(1, Math.max(0, (p - r0) / (r1 - r0))) : (p >= r0 ? 1 : 0);
+      el.style.opacity    = String(t);
+      el.style.transform  = `translateY(${offsetRef.current * (1 - t)}px)`;
+    };
+
+    // Apply immediately in case scrollYProgress already has a non-zero value
+    apply(progress.get());
+    return progress.on("change", apply);
+  }, [progress]); // progress never changes identity after mount
 
   return (
-    <motion.div style={{ opacity, y }}>
+    <div
+      ref={ref}
+      style={{ opacity: 0, transform: `translateY(${yOffset}px)`, willChange: "opacity, transform" }}
+    >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -86,8 +114,11 @@ export default function ScrollProgramSection({
   scrollHeightVh = 350,
   lockUntilComplete = true,
   lockScrollPixels = 2200,
+  mobileImage,
+  mobileImagePosition,
 }: ScrollProgramSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const stickyRef    = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const durationRef = useRef(0);
@@ -137,6 +168,7 @@ export default function ScrollProgramSection({
 
   // ── Video setup: load duration and show first frame ──────────────────────
   useEffect(() => {
+    if (isMobileViewport) return;
     if (!videoSrc || hasImageSequence) return;
     const v = videoRef.current;
     if (!v) return;
@@ -157,7 +189,7 @@ export default function ScrollProgramSection({
       v.removeEventListener("loadedmetadata", onReady);
       v.removeEventListener("canplay", onReady);
     };
-  }, [hasImageSequence, videoSrc]);
+  }, [hasImageSequence, isMobileViewport, videoSrc]);
 
   const drawFrameToCanvas = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
@@ -211,8 +243,13 @@ export default function ScrollProgramSection({
     });
   }, [drawFrameToCanvas]);
 
+  // Stable ref so the lock mechanism can force a redraw without being in the dep array
+  const scheduleCanvasDrawRef = useRef(scheduleCanvasDraw);
+  scheduleCanvasDrawRef.current = scheduleCanvasDraw;
+
   // ── Seek video whenever progress changes ─────────────────────────────────
   useEffect(() => {
+    if (isMobileViewport) return;
     if (!videoSrc || hasImageSequence) return;
     return scrollYProgress.on("change", (p) => {
       const v = videoRef.current;
@@ -220,10 +257,11 @@ export default function ScrollProgramSection({
       if (!v || dur <= 0) return;
       v.currentTime = Math.min(Math.max(p * dur, 0), dur - 0.001);
     });
-  }, [hasImageSequence, scrollYProgress, videoSrc]);
+  }, [hasImageSequence, isMobileViewport, scrollYProgress, videoSrc]);
 
   // ── Image sequence mode: map scroll progress to frame index ──────────────
   useEffect(() => {
+    if (isMobileViewport) return;
     if (!hasImageSequence || frameCount <= 0) return;
 
     return scrollYProgress.on("change", (p) => {
@@ -232,15 +270,28 @@ export default function ScrollProgramSection({
         frameCount - 1,
         Math.floor(clamped * (frameCount - 1))
       );
-      if (nextFrame !== currentFrameRef.current) {
-        currentFrameRef.current = nextFrame;
-        scheduleCanvasDraw(nextFrame);
-      }
+      currentFrameRef.current = nextFrame;
+      scheduleCanvasDraw(nextFrame);
     });
-  }, [frameCount, hasImageSequence, scheduleCanvasDraw, scrollYProgress]);
+  }, [frameCount, hasImageSequence, isMobileViewport, scheduleCanvasDraw, scrollYProgress]);
+
+  // ── Redraw canvas when section transitions in/out of viewport ────────────
+  // The browser can drop the canvas GPU layer when the sticky div is
+  // transformed off-screen (exitY > 0). When the section re-enters,
+  // scrollYProgress still holds the same value so .on("change") never fires.
+  // Subscribing to exitY and entryOpacity ensures a redraw on every transition.
+  useEffect(() => {
+    if (isMobileViewport) return;
+    if (!hasImageSequence || frameCount <= 0) return;
+    const redraw = () => scheduleCanvasDrawRef.current(currentFrameRef.current);
+    const u1 = exitY.on("change", redraw);
+    const u2 = entryOpacity.on("change", redraw);
+    return () => { u1(); u2(); };
+  }, [hasImageSequence, frameCount, isMobileViewport, exitY, entryOpacity]);
 
   // Preload sequence frames in memory for smooth scrubbing on canvas.
   useEffect(() => {
+    if (isMobileViewport) return;
     if (!hasImageSequence || !imageFrames) return;
 
     let cancelled = false;
@@ -277,11 +328,12 @@ export default function ScrollProgramSection({
         drawRafRef.current = null;
       }
     };
-  }, [hasImageSequence, imageFrames, scheduleCanvasDraw]);
+  }, [hasImageSequence, imageFrames, isMobileViewport, scheduleCanvasDraw]);
 
   // Keep canvas sharp on layout/viewport changes and ensure first frame
   // paints after hydration when canvas dimensions are finally non-zero.
   useEffect(() => {
+    if (isMobileViewport) return;
     if (!hasImageSequence) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -306,13 +358,14 @@ export default function ScrollProgramSection({
       cancelAnimationFrame(rafA);
       cancelAnimationFrame(rafB);
     };
-  }, [hasImageSequence, scheduleCanvasDraw]);
+  }, [hasImageSequence, isMobileViewport, scheduleCanvasDraw]);
 
   // ── Manual scroll + entry/exit tracker ───────────────────────────────────
   // Replaces Framer Motion's useScroll (which relies on IntersectionObserver
   // and does not fire an initial "change" event on first page load, causing the
   // scroll lock and text reveals to start in the wrong state).
   useEffect(() => {
+    if (isMobileViewport) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -358,7 +411,29 @@ export default function ScrollProgramSection({
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [scrollYProgress, entryOpacity, entryScale, exitY, instantOverlay, disableExitPin]);
+  }, [isMobileViewport, scrollYProgress, entryOpacity, entryScale, exitY, instantOverlay, disableExitPin]);
+
+  // ── Apply sticky-card styles directly to DOM ────────────────────────────
+  // motion.div with MotionValue styles doesn't reconnect after SSR hydration —
+  // the internal Framer Motion binding is not re-established on existing DOM
+  // nodes, so exitY / entryOpacity / entryScale never update on first page load.
+  // Using a plain div + direct DOM writes fixes this on both first load and SPA.
+  useEffect(() => {
+    if (isMobileViewport) return;
+    const el = stickyRef.current;
+    if (!el) return;
+
+    const apply = () => {
+      el.style.opacity   = String(entryOpacity.get());
+      el.style.transform = `scale(${entryScale.get()}) translateY(${exitY.get()})`;
+    };
+
+    apply(); // Sync current values immediately on mount
+    const u1 = entryOpacity.on("change", apply);
+    const u2 = entryScale.on("change",   apply);
+    const u3 = exitY.on("change",        apply);
+    return () => { u1(); u2(); u3(); };
+  }, [isMobileViewport, entryOpacity, entryScale, exitY]);
 
   // ── Lock mechanism: overflow:hidden + virtual scroll via wheel ────────────
   useEffect(() => {
@@ -372,6 +447,7 @@ export default function ScrollProgramSection({
     const html = document.documentElement;
     let isLocked = false;
     let virtualProgress = 0;
+    let lockedAtScrollY = 0;
     // Preserve scrollbar width to prevent layout shift
     const scrollbarWidth = window.innerWidth - html.clientWidth;
 
@@ -394,6 +470,10 @@ export default function ScrollProgramSection({
       isVirtualScrollLockedRef.current = true;
       virtualProgress = startProgress;
       scrollYProgress.set(startProgress);
+      // Force canvas redraw in case scrollYProgress value didn't change
+      // (e.g. re-entering section from below with progress already at 1)
+      scheduleCanvasDrawRef.current(currentFrameRef.current);
+      lockedAtScrollY = window.scrollY;
       html.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
       if (scrollbarWidth > 0) {
@@ -481,7 +561,18 @@ export default function ScrollProgramSection({
       }
     };
 
-    const onWheel = (e: WheelEvent) => handleDelta(e.deltaY, e);
+    // Belt-and-suspenders: if overflow:hidden + e.preventDefault() both fail
+    // (e.g. browser passive-listener intervention), reset scroll position back
+    // to where it was when we locked so the page cannot drift.
+    const onScrollReset = () => {
+      if (isLocked && window.scrollY !== lockedAtScrollY) {
+        window.scrollTo({ top: lockedAtScrollY, behavior: "instant" as ScrollBehavior });
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      handleDelta(e.deltaY, e);
+    };
 
     const onTouchStart = (e: TouchEvent) => {
       lastTouchY = e.touches[0]?.clientY ?? null;
@@ -505,17 +596,21 @@ export default function ScrollProgramSection({
       if (delta !== undefined) handleDelta(delta, e);
     };
 
-    window.addEventListener("wheel", onWheel, { passive: false });
+    // wheel: capture phase on document makes the event cancelable even when Chrome's
+    // passive-listener intervention would otherwise force it to be non-cancelable on window.
+    window.addEventListener("scroll", onScrollReset, { passive: true });
+    document.addEventListener("wheel", onWheel, { passive: false, capture: true });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    document.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
     window.addEventListener("touchend", onTouchEnd);
     window.addEventListener("touchcancel", onTouchEnd);
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("scroll", onScrollReset);
+      document.removeEventListener("wheel", onWheel, { capture: true });
       window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchmove", onTouchMove, { capture: true });
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("keydown", onKeyDown);
@@ -523,10 +618,35 @@ export default function ScrollProgramSection({
     };
   }, [animKey, effectiveLockScrollPixels, effectiveLockUntilComplete, scrollYProgress]);
 
-  // Scroll hint fades out early
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.04], [1, 0]);
-  const pretitleOpacity = useTransform(scrollYProgress, [0, 0.14, 0.2], [1, 1, 0]);
-  const pretitleY = useTransform(scrollYProgress, [0, 0.2], [0, -12]);
+  const pretitleRef = useRef<HTMLDivElement>(null);
+  const hintRef     = useRef<HTMLDivElement>(null);
+
+  // Pretitle: fades out as scroll progresses
+  useEffect(() => {
+    if (isMobileViewport) return;
+    const el = pretitleRef.current;
+    if (!el) return;
+    const apply = (p: number) => {
+      const opacity = p < 0.14 ? 1 : p < 0.2 ? 1 - (p - 0.14) / 0.06 : 0;
+      const y = p * -12 / 0.2;
+      el.style.opacity   = String(Math.max(0, opacity));
+      el.style.transform = `translateX(-50%) translateY(${Math.min(0, y)}px)`;
+    };
+    apply(scrollYProgress.get());
+    return scrollYProgress.on("change", apply);
+  }, [isMobileViewport, scrollYProgress]);
+
+  // Scroll hint: fades out very early
+  useEffect(() => {
+    if (isMobileViewport) return;
+    const el = hintRef.current;
+    if (!el) return;
+    const apply = (p: number) => {
+      el.style.opacity = String(Math.max(0, 1 - p / 0.04));
+    };
+    apply(scrollYProgress.get());
+    return scrollYProgress.on("change", apply);
+  }, [isMobileViewport, scrollYProgress]);
 
   // ── Text reveal ranges — compact so text appears quickly ────────────────────
   const titleRange:       [number, number] = [0, 0.05];
@@ -538,6 +658,141 @@ export default function ScrollProgramSection({
   const ctaRange:         [number, number] = [0.22, 0.30];
 
   const isRight = align === "right";
+  const mobileLastFrame =
+    mobileImage ??
+    (hasImageSequence && frameCount > 0
+      ? imageFrames?.[frameCount - 1] ?? imageFrames?.[0]
+      : undefined);
+
+  if (isMobileViewport) {
+    return (
+      <section
+        id={sectionId}
+        data-programs-focus={navFocusKey}
+        style={{
+          background: "#0A0A0A",
+          padding: "clamp(1.2rem, 4vw, 1.6rem) clamp(1rem, 4.5vw, 1.4rem)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "100%",
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.2rem",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center", textAlign: "center" }}>
+            {pretitle ? (
+              <p
+                style={{
+                  color: "rgba(212,167,75,0.92)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "0.86rem",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {pretitle}
+              </p>
+            ) : null}
+
+            <h3
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(2rem, 11vw, 2.8rem)",
+                color: "#fff",
+                lineHeight: 0.95,
+                letterSpacing: "0.01em",
+              }}
+            >
+              {title}
+            </h3>
+          </div>
+
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "22rem",
+              margin: "0 auto",
+              borderRadius: "0px",
+              overflow: "hidden",
+              border: "0",
+              boxShadow: "none",
+              background: "#111",
+            }}
+          >
+            {mobileLastFrame ? (
+              <Image
+                src={mobileLastFrame}
+                alt={`${title} program frame`}
+                fill
+                sizes="100vw"
+                style={{ objectFit: "cover", objectPosition: mobileImagePosition ?? "center" }}
+              />
+            ) : null}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.36) 100%)",
+              }}
+            />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.72rem", alignItems: "center", textAlign: "center" }}>
+            <p
+              style={{
+                color: "#D4A74B",
+                fontSize: "clamp(0.95rem, 4.5vw, 1.1rem)",
+                fontWeight: 600,
+                lineHeight: 1.3,
+              }}
+            >
+              {subtitle}
+            </p>
+
+            <p
+              style={{
+                color: "rgba(255,255,255,0.82)",
+                fontSize: "clamp(0.9rem, 3.9vw, 0.98rem)",
+                lineHeight: 1.6,
+                alignSelf: "stretch",
+                textAlign: "left",
+              }}
+            >
+              {description}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.56rem", alignSelf: "stretch", alignItems: "flex-start", textAlign: "left" }}>
+              <BulletItem text={bullets[0]} />
+              <BulletItem text={bullets[1]} />
+              <BulletItem text={bullets[2]} />
+            </div>
+
+            <Link
+              href={ctaHref}
+              className="inline-flex items-center gap-2 btn-predator btn-gold text-black/95"
+              style={{
+                alignSelf: "center",
+                fontSize: "0.85rem",
+                paddingInline: "1.2rem",
+                paddingBlock: "0.86rem",
+                letterSpacing: "0.1em",
+                marginTop: "0.35rem",
+              }}
+            >
+              <span>{ctaText}</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div
@@ -546,7 +801,8 @@ export default function ScrollProgramSection({
       data-programs-focus={navFocusKey}
       style={{ height: effectiveScrollHeightCss }}
     >
-      <motion.div
+      <div
+        ref={stickyRef}
         style={{
           position: "sticky",
           top: 0,
@@ -554,9 +810,9 @@ export default function ScrollProgramSection({
           width: "100%",
           overflow: "hidden",
           background: "#0A0A0A",
-          opacity: entryOpacity,
-          scale: entryScale,
-          y: exitY,
+          opacity: 0.82,
+          transform: "scale(0.98) translateY(0vh)",
+          willChange: "opacity, transform",
           ...(roundedTop && {
             clipPath: "inset(0 round 28px 28px 0px 0px)",
             boxShadow: "0 -32px 80px rgba(0,0,0,0.9)",
@@ -567,19 +823,19 @@ export default function ScrollProgramSection({
         {hasImageSequence ? (
           <>
             {imageFrames?.[0] ? (
-              <Image
-                src={imageFrames[0]}
-                alt=""
-                aria-hidden="true"
-                fill
-                sizes="100vw"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  objectFit: "cover",
-                  objectPosition: "center",
-                }}
-              />
+              <div style={{ position: "absolute", inset: 0 }}>
+                <Image
+                  src={imageFrames[0]}
+                  alt=""
+                  aria-hidden="true"
+                  fill
+                  sizes="100vw"
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "center",
+                  }}
+                />
+              </div>
             ) : null}
             <canvas
               ref={canvasRef}
@@ -614,19 +870,20 @@ export default function ScrollProgramSection({
         <div style={{ position: "absolute", inset: 0, background: overlayGradient }} />
 
         {pretitle ? (
-          <motion.div
+          <div
+            ref={pretitleRef}
             style={{
               position: "absolute",
               top: "clamp(5.5rem, 9vh, 7rem)",
               left: "50%",
-              translateX: "-50%",
+              transform: "translateX(-50%) translateY(0px)",
               zIndex: 12,
               padding: "0.35rem 0.9rem",
               border: "1px solid rgba(212,167,75,0.35)",
               background: "rgba(0,0,0,0.42)",
               backdropFilter: "blur(3px)",
-              opacity: pretitleOpacity,
-              y: pretitleY,
+              opacity: 1,
+              willChange: "opacity, transform",
             }}
           >
             <span
@@ -642,7 +899,7 @@ export default function ScrollProgramSection({
             >
               {pretitle}
             </span>
-          </motion.div>
+          </div>
         ) : null}
 
         {/* Content */}
@@ -749,18 +1006,20 @@ export default function ScrollProgramSection({
         </div>
 
         {/* Scroll hint */}
-        <motion.div
+        <div
+          ref={hintRef}
           style={{
             position: "absolute",
             bottom: isMobileViewport ? "22px" : "36px",
             left: "50%",
-            translateX: "-50%",
-            opacity: hintOpacity,
+            transform: "translateX(-50%)",
+            opacity: 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: "8px",
             pointerEvents: "none",
+            willChange: "opacity",
           }}
         >
           <span
@@ -782,8 +1041,8 @@ export default function ScrollProgramSection({
               animation: `${animKey}Pulse 1.5s ease-in-out infinite`,
             }}
           />
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       <style>{`
         @keyframes ${animKey}Pulse {

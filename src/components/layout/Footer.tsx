@@ -16,7 +16,7 @@ const PROGRAMS = [
   { name: "BJJ Gi", href: "/classes#bjj-gi" },
   { name: "No-Gi", href: "/classes#no-gi" },
   { name: "MMA", href: "/classes#mma" },
-  { name: "Kids Programs", href: "/classes#kids" },
+  { name: "Kids Programs", href: "/classes" },
   { name: "Private Training", href: "/contact" },
 ];
 
@@ -37,18 +37,19 @@ export default function Footer() {
 
       {/* Main Footer Content */}
       <div
-        className="w-full px-6 md:px-12 py-8 md:py-10"
+        className="w-full px-5 md:px-12 py-6 md:py-10"
         style={{ maxWidth: "1280px", marginInline: "auto" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-y-8 md:gap-x-10 lg:gap-x-12 text-center md:text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-y-8 md:gap-x-10 lg:gap-x-12 text-center md:text-left">
           {/* Brand Column */}
           <div className="lg:col-span-1 mt-1 md:mt-2">
-            <Link href="/#hero" className="inline-flex items-center gap-3 mb-6">
+            <Link href="/#hero" className="inline-flex items-center gap-3 mb-4">
               <div className="relative w-12 h-12">
                 <Image
                   src="/images/jaguar-logo.png"
                   alt="Stay Relentless BJJ"
                   fill
+                  sizes="48px"
                   className="object-contain"
                 />
               </div>
@@ -64,7 +65,7 @@ export default function Footer() {
                 </span>
               </div>
             </Link>
-            <p className="text-text-secondary text-sm leading-relaxed mb-6 max-w-sm mx-auto md:mx-0">
+            <p className="text-text-secondary text-sm leading-relaxed mb-4 max-w-sm mx-auto md:mx-0">
               Premier Brazilian Jiu Jitsu and MMA training center in Midland, Texas.
               Building warriors since 2000.
             </p>
@@ -79,18 +80,98 @@ export default function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 flex items-center justify-center bg-background border border-border hover:border-gold hover:text-gold transition-all duration-300"
+                    className="w-9 h-9 flex items-center justify-center bg-background border border-border hover:border-gold hover:text-gold transition-all duration-300"
                     aria-label={social.name}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-[15px] h-[15px]" />
                   </a>
                 );
               })}
             </div>
           </div>
 
+          {/* Mobile Compact Sections */}
+          <div className="md:hidden pt-0.5">
+            <div className="mx-auto grid w-fit grid-cols-[max-content_max-content] justify-center gap-x-10 gap-y-5 text-left">
+              <div>
+                <h4
+                  className="text-white text-xs tracking-[0.12em] uppercase"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Navigation
+                </h4>
+                <div className="h-2.5" />
+                <nav className="flex flex-col gap-2">
+                  {NAV_LINKS.map((link) => (
+                    <Link
+                      key={`mobile-nav-${link.href}`}
+                      href={link.href}
+                      className="block text-text-secondary hover:text-gold transition-colors text-[0.95rem] leading-tight"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+
+              <div>
+                <h4
+                  className="text-white text-xs tracking-[0.12em] uppercase"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Programs
+                </h4>
+                <div className="h-2.5" />
+                <nav className="flex flex-col gap-2">
+                  {PROGRAMS.map((program) => (
+                    <Link
+                      key={`mobile-program-${program.href}`}
+                      href={program.href}
+                      className="block text-text-secondary hover:text-gold transition-colors text-[0.95rem] leading-tight"
+                    >
+                      {program.name}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="col-span-2 mx-auto w-full max-w-[330px] text-center">
+                <h4
+                  className="text-white text-xs tracking-[0.12em] uppercase"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Contact
+                </h4>
+                <div className="h-2.5" />
+                <div className="grid grid-cols-1 gap-2.5">
+                  <a
+                    href="tel:+14325550123"
+                    className="flex items-center justify-center gap-2.5 text-text-secondary hover:text-gold transition-colors text-[0.95rem] leading-tight"
+                  >
+                    <Phone className="w-4 h-4 text-gold" />
+                    (432) 555-0123
+                  </a>
+                  <a
+                    href="mailto:info@midlandbjjmma.com"
+                    className="flex items-center justify-center gap-2.5 text-text-secondary hover:text-gold transition-colors text-[0.95rem] leading-tight"
+                  >
+                    <Mail className="w-4 h-4 text-gold" />
+                    info@midlandbjjmma.com
+                  </a>
+                  <div className="flex items-start justify-center gap-2.5 text-text-secondary text-[0.95rem] leading-tight">
+                    <MapPin className="w-4 h-4 text-gold flex-shrink-0" />
+                    <span>
+                      4612 Billingsley Blvd<br />
+                      Midland, TX 79705
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Navigation */}
-          <div className="pt-3 md:pt-4">
+          <div className="hidden md:block pt-3 md:pt-4">
             <h4
               className="text-white text-sm tracking-[0.1em] uppercase"
               style={{ fontFamily: "var(--font-display)" }}
@@ -112,7 +193,7 @@ export default function Footer() {
           </div>
 
           {/* Programs */}
-          <div className="pt-3 md:pt-4">
+          <div className="hidden md:block pt-3 md:pt-4">
             <h4
               className="text-white text-sm tracking-[0.1em] uppercase"
               style={{ fontFamily: "var(--font-display)" }}
@@ -134,7 +215,7 @@ export default function Footer() {
           </div>
 
           {/* Contact Info */}
-          <div className="pt-3 md:pt-4">
+          <div className="hidden md:block pt-3 md:pt-4">
             <h4
               className="text-white text-sm tracking-[0.1em] uppercase"
               style={{ fontFamily: "var(--font-display)" }}
@@ -206,6 +287,7 @@ export default function Footer() {
           src="/images/jaguar-logo.png"
           alt=""
           fill
+          sizes="400px"
           className="object-contain grayscale"
         />
       </div>

@@ -29,6 +29,7 @@ export default function NoGiScrollSection() {
       scrollHeightVh={300}
       lockScrollPixels={1300}
       lockUntilComplete
+      mobileImage="/images/bjj-nogi-mobile.png"
     />
   );
 }

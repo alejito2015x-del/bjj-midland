@@ -7,7 +7,7 @@ import ChoosePathSection from "./ChoosePathSection";
 
 export default function ScrollSections() {
   return (
-    <div className="-mt-[90svh] sm:-mt-[95svh] lg:-mt-[100vh]">
+    <div className="mt-0 lg:-mt-[100vh]">
       <ChoosePathSection />
       <GiScrollSection />
       <NoGiScrollSection />

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { InteractiveHoverButton } from "@/components/ui/InteractiveHoverButton";
 import { useRegistrationModal } from "@/context/RegistrationModalContext";
 
@@ -50,17 +51,31 @@ export default function Hero() {
   };
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative min-h-[100svh] lg:min-h-screen flex items-end lg:items-center justify-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-black">
         <video
           ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover"
-          src="/images/hf_20260225_070918_2efae084-34a4-4698-ae6d-edb59749f09a.mp4"
+          className="absolute left-0 top-0 h-[52svh] w-full origin-top scale-[1.56] object-cover object-[center_62%] will-change-transform md:inset-0 md:h-full md:scale-100 md:object-cover md:object-center"
           autoPlay
           muted
           playsInline
-        />
+        >
+          <source
+            src="/images/hero-mobile-fullbody-v2.mp4"
+            media="(max-width: 767px)"
+          />
+          <source src="/images/hf_20260225_070918_2efae084-34a4-4698-ae6d-edb59749f09a.mp4" />
+        </video>
+        <div className="absolute inset-x-0 bottom-0 top-[52svh] md:hidden">
+          <Image
+            src="/images/hero-mobile-black-fill-20260311.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
         <div className="absolute inset-0 bg-black/35" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background-elevated/70" />
         <div className="absolute inset-0 bg-[radial-gradient(35%_80%_at_50%_0%,rgba(212,167,75,0.08),transparent)]" />
@@ -68,31 +83,35 @@ export default function Hero() {
 
       {/* Main Content */}
       <div
-        className="relative z-10 flex flex-col items-center justify-center gap-6 md:gap-8 w-full text-center px-4 sm:px-6"
+        className="relative z-10 flex flex-col items-center gap-0 md:gap-8 w-full text-center px-5 sm:px-6 pb-20 lg:pb-0"
         style={{
           maxWidth: "1280px",
           marginInline: "auto",
           paddingTop: "clamp(5.5rem, 16vw, 8rem)",
-          paddingBottom: "0",
         }}
       >
 
         {/* Headline */}
         <div className="flex flex-col items-center gap-1 md:gap-2">
-          <h1 className="text-[clamp(2.2rem,9vw,6rem)] font-normal leading-none tracking-tight text-white">
+          <h1
+            className="font-normal leading-none tracking-tight text-white"
+            style={{ fontSize: "clamp(4rem,17vw,6rem)" }}
+          >
             MIDLAND
           </h1>
           <div
             className="relative w-full flex justify-center"
-            style={{ height: "clamp(2.8rem, 11vw, 4.5rem)", marginTop: "0.25rem" }}
+            style={{ height: "clamp(3rem, 12vw, 4.5rem)", marginTop: "0.15rem" }}
           >
             {titles.map((title, index) => (
               <motion.span
                 key={index}
-                className="absolute text-center px-2 sm:px-0 whitespace-nowrap text-[clamp(1.35rem,6.6vw,3.8rem)] font-normal tracking-tight"
+                className="absolute text-center whitespace-nowrap font-normal tracking-tight"
                 style={{
                   color: "#D4A74B",
                   fontFamily: "var(--font-display)",
+                  fontSize: "clamp(1.5rem,7.5vw,3.8rem)",
+                  top: "1.2rem",
                 }}
                 initial={{ opacity: 0, y: 60 }}
                 transition={{ type: "spring", stiffness: 60, damping: 14 }}
@@ -108,24 +127,23 @@ export default function Hero() {
           </div>
         </div>
 
-        <div style={{ height: "8px" }} />
-
         {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-7 mt-8 sm:mt-12 md:mt-16"
+          className="flex flex-col items-stretch w-full gap-3 mt-12 max-w-xs lg:flex-row lg:items-center lg:justify-center lg:max-w-none lg:gap-7 lg:mt-16"
         >
           <Link
             href="/contact"
             onClick={(e) => { e.preventDefault(); openModal("trial"); }}
+            className="w-full lg:w-auto"
           >
             <InteractiveHoverButton
               text="Start Your Journey"
               variant="gold"
-              className="text-sm sm:text-base tracking-[0.14em] sm:tracking-[0.18em]"
-              style={{ paddingInline: "clamp(1.4rem, 8vw, 2.5rem)", paddingBlock: "clamp(0.8rem, 3.5vw, 1.1rem)" }}
+              className="w-full text-[0.82rem] tracking-[0.16em] lg:w-auto lg:text-base lg:tracking-[0.18em]"
+              style={{ paddingInline: "1.5rem", paddingBlock: "1rem" }}
             />
           </Link>
           <InteractiveHoverButton
@@ -133,9 +151,9 @@ export default function Hero() {
             onClick={handleViewScheduleClick}
             text="View Schedule"
             variant="outline"
-            icon={<Play className="w-5 h-5" />}
-            className="text-sm sm:text-base tracking-[0.14em] sm:tracking-[0.18em]"
-            style={{ paddingInline: "clamp(1.4rem, 8vw, 2.5rem)", paddingBlock: "clamp(0.8rem, 3.5vw, 1.1rem)" }}
+            icon={<Play className="w-4 h-4" />}
+            className="w-full text-[0.82rem] tracking-[0.16em] lg:w-auto lg:text-base lg:tracking-[0.18em]"
+            style={{ paddingInline: "1.5rem", paddingBlock: "1rem" }}
           />
         </motion.div>
       </div>

@@ -29,6 +29,8 @@ export default function MmaScrollSection() {
       scrollHeightVh={300}
       lockScrollPixels={1300}
       lockUntilComplete
+      mobileImage="/images/mma-mobile-chatgpt-20260311.jpg"
+      mobileImagePosition="30% center"
     />
   );
 }

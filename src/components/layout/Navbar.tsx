@@ -22,6 +22,7 @@ const PROGRAMS_FOCUS_PROGRESS = 0.3;
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { openModal } = useRegistrationModal();
@@ -116,20 +117,10 @@ export default function Navbar() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, [pathname, scrollToHashWithOffset]);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 py-2.5 md:py-3 transition-all duration-300 ${scrolled ? "bg-black/90 backdrop-blur-sm shadow-lg" : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 py-2.5 md:py-3 transition-all duration-300 ${scrolled && !menuVisible ? "bg-black/90 backdrop-blur-sm shadow-lg" : "bg-transparent"
         }`}
     >
       <div
@@ -196,7 +187,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => { const next = !isOpen; setIsOpen(next); if (next) setMenuVisible(true); }}
             className="lg:hidden relative z-50 w-10 h-10 flex items-center justify-center text-white hover:text-gold transition-colors"
             aria-label="Toggle menu"
           >
@@ -228,26 +219,15 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => setMenuVisible(false)}>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-background z-40 lg:hidden"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xl z-40 lg:hidden"
           >
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px]">
-                <Image
-                  src="/images/jaguar-logo.png"
-                  alt=""
-                  fill
-                  className="object-contain grayscale"
-                />
-              </div>
-            </div>
 
             <nav className="relative h-full flex flex-col items-center justify-center px-6 pt-[max(env(safe-area-inset-top),1rem)] pb-[max(env(safe-area-inset-bottom),1rem)]">
               <div className="flex flex-col items-center gap-2">
