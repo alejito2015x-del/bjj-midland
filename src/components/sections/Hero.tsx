@@ -56,7 +56,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-black">
         <video
           ref={videoRef}
-          className="absolute left-0 top-0 h-[52svh] w-full origin-top scale-[1.56] object-cover object-[center_62%] will-change-transform md:inset-0 md:h-full md:scale-100 md:object-cover md:object-center"
+          className="absolute left-0 top-0 h-[52svh] w-full origin-top scale-[1.72] object-cover object-[center_70%] will-change-transform md:inset-0 md:h-full md:scale-100 md:object-cover md:object-center"
           autoPlay
           muted
           playsInline
