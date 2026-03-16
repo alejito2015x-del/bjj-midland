@@ -214,15 +214,15 @@ export default function Testimonials() {
       <div className="relative mx-auto w-full max-w-[1460px] px-5 sm:px-7 md:px-10 lg:px-14 xl:px-16">
 
         {/* ── Section header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col gap-4 md:gap-5"
-        >
+        <div className="flex flex-col gap-4 md:gap-5">
           {/* Eyebrow */}
-          <div className="flex items-center justify-center gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+            className="flex items-center justify-center gap-4"
+          >
             <div className="h-px w-14 bg-gold/50" />
             <span
               className="uppercase text-gold/85 tracking-[0.35em] text-[11px] font-semibold"
@@ -231,10 +231,16 @@ export default function Testimonials() {
               Testimonials
             </span>
             <div className="h-px w-14 bg-gold/50" />
-          </div>
+          </motion.div>
 
           {/* Title */}
-          <div className="flex justify-center w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            className="flex justify-center w-full"
+          >
             <h2
               className="w-full max-w-[980px] leading-[0.88] uppercase text-center"
               style={{
@@ -253,14 +259,14 @@ export default function Testimonials() {
                 SAY ABOUT US
               </span>
             </h2>
-          </div>
+          </motion.div>
 
           {/* ── Rating badge — centered full-width strip ── */}
           <motion.div
-            initial={{ opacity: 0, scaleX: 0.88 }}
-            whileInView={{ opacity: 1, scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="relative flex items-center justify-center overflow-hidden py-3 md:py-4 rounded-xl border border-gold/20"
             style={{
               background:
@@ -364,7 +370,7 @@ export default function Testimonials() {
               style={{ background: "linear-gradient(to right, #0A0A0A, transparent)" }}
             />
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* ── Gold rule ── */}
         <div className="mt-5 mb-5 md:mt-6 md:mb-6 flex items-center gap-3">

@@ -9,13 +9,11 @@ import CTA from "@/components/sections/CTA";
 import Testimonials from "@/components/sections/Testimonials";
 import InstagramFeed from "@/components/sections/InstagramFeed";
 import SectionReveal from "@/components/sections/SectionReveal";
-import ScrollProgressBar from "@/components/sections/ScrollProgressBar";
 import ScrollReset from "@/components/layout/ScrollReset";
 
 export default function Home() {
   return (
     <>
-      <ScrollProgressBar />
       <ScrollReset />
       <Navbar />
       <main>

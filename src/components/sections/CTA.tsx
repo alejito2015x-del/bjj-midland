@@ -6,6 +6,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRegistrationModal } from "@/context/RegistrationModalContext";
 
+const fadeUp = (delay: number) => ({
+  initial: { opacity: 0, y: 32 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2 as const },
+  transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const, delay },
+});
+
 export default function CTA() {
   const { openModal } = useRegistrationModal();
   return (
@@ -30,40 +37,48 @@ export default function CTA() {
         style={{ maxWidth: "1280px", marginInline: "auto" }}>
         <div className="grid lg:grid-cols-2 gap-14 xl:gap-20 items-center">
           {/* Left: Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="text-center lg:text-left"
-          >
+          <div className="text-center lg:text-left">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-gold/30 bg-gold/5">
+            <motion.div
+              {...fadeUp(0)}
+              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-gold/30 bg-gold/5"
+            >
               <span className="w-2.5 h-2.5 rounded-full bg-neon-green animate-pulse" />
               <span className="text-gold text-sm md:text-base font-semibold tracking-[0.15em] uppercase">
                 First Class Free
               </span>
-            </div>
+            </motion.div>
 
             <div aria-hidden="true" className="h-6 md:h-8 lg:h-10" />
 
             {/* Heading */}
-            <h2 className="text-5xl md:text-6xl lg:text-7xl text-white" style={{ fontFamily: 'var(--font-display)' }}>
+            <motion.h2
+              {...fadeUp(0.1)}
+              className="text-5xl md:text-6xl lg:text-7xl text-white"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               YOUR JOURNEY
               <span className="block text-gradient-gold">STARTS HERE</span>
-            </h2>
+            </motion.h2>
 
             <div aria-hidden="true" className="h-5 md:h-7 lg:h-8" />
 
             {/* Description */}
-            <p className="text-text-secondary text-lg max-w-lg mx-auto lg:mx-0 leading-relaxed">
+            <motion.p
+              {...fadeUp(0.2)}
+              className="text-text-secondary text-lg max-w-lg mx-auto lg:mx-0 leading-relaxed"
+            >
               No experience required. Walk in as a beginner, walk out as part of the tribe.
               Every champion was once a contender who refused to give up.
-            </p>
+            </motion.p>
 
             <div aria-hidden="true" className="h-8 md:h-10 lg:h-12" />
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+            <motion.div
+              {...fadeUp(0.3)}
+              className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4"
+            >
               <Link
                 href="/contact"
                 onClick={(e) => { e.preventDefault(); openModal("trial"); }}
@@ -79,12 +94,15 @@ export default function CTA() {
                 <Phone className="w-5 h-5" />
                 <span>Call Now</span>
               </a>
-            </div>
+            </motion.div>
 
             <div aria-hidden="true" className="h-10 md:h-12 lg:h-14" />
 
             {/* Info Cards */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            <motion.div
+              {...fadeUp(0.4)}
+              className="grid sm:grid-cols-2 gap-4"
+            >
               <div className="flex items-center lg:items-start gap-4 p-4 bg-background-card border border-border rounded-lg">
                 <div className="w-10 h-10 flex items-center justify-center bg-gold/10 rounded-lg flex-shrink-0">
                   <MapPin className="w-5 h-5 text-gold" />
@@ -103,15 +121,15 @@ export default function CTA() {
                   <p className="text-text-secondary text-sm">Mon-Fri 6am-9pm • Sat 8am-2pm</p>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
           {/* Right: Visual */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="relative min-w-0"
           >
             <div className="relative mx-auto flex items-center justify-center w-full max-w-[72rem] origin-center scale-[1.28] sm:scale-[1.42] lg:scale-[1.62]">

@@ -137,15 +137,15 @@ export default function SchedulePoster() {
       {/* ════════════════════════════════════════════
           HEADER — centrado con max-width
           ════════════════════════════════════════════ */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        className="relative text-center"
-        style={{ marginBottom: "0.45rem" }}
-      >
-        <div className="flex items-center justify-center gap-2" style={{ marginBottom: "0.7rem" }}>
+      <div className="relative text-center" style={{ marginBottom: "0.45rem" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+          className="flex items-center justify-center gap-2"
+          style={{ marginBottom: "0.7rem" }}
+        >
           <span className="block h-px bg-gold/60" style={{ width: "2rem" }} />
           <span
             className="text-gold uppercase"
@@ -154,9 +154,13 @@ export default function SchedulePoster() {
             Weekly Training
           </span>
           <span className="block h-px bg-gold/60" style={{ width: "2rem" }} />
-        </div>
+        </motion.div>
 
-        <h2
+        <motion.h2
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
           className="section-title-standard text-center"
           style={{
             margin: "0 auto",
@@ -166,9 +170,13 @@ export default function SchedulePoster() {
           }}
         >
           Class <span className="text-white">Schedule</span>
-        </h2>
+        </motion.h2>
 
-        <p
+        <motion.p
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           className="text-text-secondary"
           style={{
             fontFamily: "var(--font-body)",
@@ -181,17 +189,17 @@ export default function SchedulePoster() {
           }}
         >
           Train every day. Build your legacy on the mat.
-        </p>
-      </motion.div>
+        </motion.p>
+      </div>
 
       {/* ════════════════════════════════════════════
           FILTER TABS — grandes y claros
           ════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         className="relative flex justify-center"
         style={{ marginBottom: "0.95rem" }}
       >
@@ -350,10 +358,10 @@ export default function SchedulePoster() {
           DESKTOP VIEW — tabla + panel lateral derecho
           ════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, delay: 0.15 }}
+        initial={{ opacity: 0, y: 32, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         className="hidden lg:block relative"
         style={{ padding: "0 1rem" }}
       >
@@ -581,10 +589,10 @@ export default function SchedulePoster() {
           MOBILE LEGEND (solo visible en mobile)
           ════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
         className="relative lg:hidden flex flex-wrap items-center justify-center"
         style={{ marginTop: "2rem", gap: "1rem 1.5rem", padding: "0 1rem" }}
       >
