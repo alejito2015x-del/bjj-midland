@@ -129,3 +129,31 @@ Establecido: 2000
 - Toda sección debe colapsar a 1 columna en móvil con `grid-cols-1`.
 - En móvil, padding de sección: `py-16 px-6`.
 - Gaps en móvil: `gap-8` (32px).
+
+---
+
+## Checkpoints de Git
+
+### checkpoint-v1 — Hero Mobile Redesign
+**Fecha:** 2026-03-15
+**Deploy:** https://bjj-midland.vercel.app
+**Estado:** Build limpio, 0 errores TypeScript, 11 páginas estáticas
+
+**Qué incluye:**
+- Hero mobile con video full-bleed (`height: 100svh`)
+- Video con `scale(1.65)`, `objectPosition: center 70%`
+- Gradiente inferior al 75% de altura (mat/pies completamente oscuros)
+- Texto y botones posicionados absolutamente al fondo
+- Hero ocupa exactamente 100% del viewport en carga inicial
+
+**Para volver a este punto:**
+```bash
+# Solo ver el código (sin modificar):
+git checkout checkpoint-v1
+
+# Restaurar TODO al estado de este checkpoint (descarta cambios posteriores):
+git reset --hard checkpoint-v1
+git push origin main --force
+```
+
+> ⚠️ El `--force` sobreescribe todo lo que hayas cambiado después. Úsalo solo si estás seguro.
