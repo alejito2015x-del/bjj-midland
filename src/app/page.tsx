@@ -9,11 +9,13 @@ import CTA from "@/components/sections/CTA";
 import Testimonials from "@/components/sections/Testimonials";
 import InstagramFeed from "@/components/sections/InstagramFeed";
 import SectionReveal from "@/components/sections/SectionReveal";
+import ScrollProgressBar from "@/components/sections/ScrollProgressBar";
 import ScrollReset from "@/components/layout/ScrollReset";
 
 export default function Home() {
   return (
     <>
+      <ScrollProgressBar />
       <ScrollReset />
       <Navbar />
       <main>
@@ -26,18 +28,18 @@ export default function Home() {
         {/* MMA, Kids, Veteran, Location */}
         <Programs />
 
-        <SectionReveal delay={0.02}>
+        <SectionReveal delay={0.02} variant="scale">
           <Suspense>
             <SchedulePoster />
           </Suspense>
         </SectionReveal>
-        <SectionReveal delay={0.04}>
+        <SectionReveal delay={0.04} variant="fadeUp">
           <Testimonials />
         </SectionReveal>
-        <SectionReveal delay={0.06}>
+        <SectionReveal delay={0.06} variant="fadeLeft">
           <InstagramFeed />
         </SectionReveal>
-        <SectionReveal delay={0.08}>
+        <SectionReveal delay={0.08} variant="scale">
           <CTA />
         </SectionReveal>
       </main>

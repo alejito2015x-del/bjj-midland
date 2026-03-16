@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import StaggerReveal, { StaggerItem } from "@/components/sections/StaggerReveal";
 
 const revealUp = {
   hidden: { opacity: 0, y: 36, scale: 0.98 },
@@ -240,22 +241,30 @@ export default function Programs() {
               viewport={{ once: true, amount: 0.45 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <h3
-                className="hidden md:block text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                KIDS & YOUTH PROGRAMS
-              </h3>
-              <p className="text-text-secondary max-w-2xl mx-auto leading-relaxed text-base sm:text-lg md:text-xl">
-                Our Kids & Youth classes build confidence, focus, discipline, and respect through age-appropriate Jiu Jitsu training. Students learn real technique, anti-bullying awareness, and leadership habits in a structured environment designed for growth on and off the mats. Programs available for ages 4 and up.
-              </p>
-              <Link
-                href="/classes"
-                className="inline-flex items-center gap-2 btn-predator btn-outline-gold px-8 py-4 text-sm sm:px-10 sm:py-4 sm:text-base md:px-12 md:py-5 md:text-lg"
-              >
-                <span>EXPLORE THIS PROGRAM</span>
-                <ArrowUpRight className="w-5 h-5" />
-              </Link>
+              <StaggerReveal className="flex flex-col items-center gap-6 md:gap-10 w-full">
+                <StaggerItem>
+                  <h3
+                    className="hidden md:block text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    KIDS & YOUTH PROGRAMS
+                  </h3>
+                </StaggerItem>
+                <StaggerItem>
+                  <p className="text-text-secondary max-w-2xl mx-auto leading-relaxed text-base sm:text-lg md:text-xl">
+                    Our Kids & Youth classes build confidence, focus, discipline, and respect through age-appropriate Jiu Jitsu training. Students learn real technique, anti-bullying awareness, and leadership habits in a structured environment designed for growth on and off the mats. Programs available for ages 4 and up.
+                  </p>
+                </StaggerItem>
+                <StaggerItem>
+                  <Link
+                    href="/classes"
+                    className="inline-flex items-center gap-2 btn-predator btn-outline-gold px-8 py-4 text-sm sm:px-10 sm:py-4 sm:text-base md:px-12 md:py-5 md:text-lg"
+                  >
+                    <span>EXPLORE THIS PROGRAM</span>
+                    <ArrowUpRight className="w-5 h-5" />
+                  </Link>
+                </StaggerItem>
+              </StaggerReveal>
             </motion.div>
           </div>
         </motion.div>
@@ -305,22 +314,30 @@ export default function Programs() {
               viewport={{ once: true, amount: 0.45 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <h3
-                className="hidden md:block text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                VETERAN & LEO PROGRAMS
-              </h3>
-              <p className="text-text-secondary max-w-2xl mx-auto leading-relaxed text-base sm:text-lg md:text-xl">
-                We proudly support veterans and law enforcement with scholarship opportunities and a mission-driven training environment focused on resilience, stress management, and practical grappling. As a certified C4C PJJ training center, we provide a trusted community where service members can continue to sharpen mindset, fitness, and real-world readiness.
-              </p>
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 btn-predator btn-outline-gold px-8 py-4 text-sm sm:px-10 sm:py-4 sm:text-base md:px-12 md:py-5 md:text-lg"
-              >
-                <span>EXPLORE THIS PROGRAM</span>
-                <ArrowUpRight className="w-5 h-5" />
-              </Link>
+              <StaggerReveal className="flex flex-col items-center gap-6 md:gap-10 w-full">
+                <StaggerItem>
+                  <h3
+                    className="hidden md:block text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    VETERAN & LEO PROGRAMS
+                  </h3>
+                </StaggerItem>
+                <StaggerItem>
+                  <p className="text-text-secondary max-w-2xl mx-auto leading-relaxed text-base sm:text-lg md:text-xl">
+                    We proudly support veterans and law enforcement with scholarship opportunities and a mission-driven training environment focused on resilience, stress management, and practical grappling. As a certified C4C PJJ training center, we provide a trusted community where service members can continue to sharpen mindset, fitness, and real-world readiness.
+                  </p>
+                </StaggerItem>
+                <StaggerItem>
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-2 btn-predator btn-outline-gold px-8 py-4 text-sm sm:px-10 sm:py-4 sm:text-base md:px-12 md:py-5 md:text-lg"
+                  >
+                    <span>EXPLORE THIS PROGRAM</span>
+                    <ArrowUpRight className="w-5 h-5" />
+                  </Link>
+                </StaggerItem>
+              </StaggerReveal>
             </motion.div>
           </div>
         </motion.div>
