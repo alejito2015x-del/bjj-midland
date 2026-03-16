@@ -8,6 +8,41 @@ import {
 } from "lucide-react";
 import { useRegistrationModal } from "@/context/RegistrationModalContext";
 
+const RESPONSIVE_STYLES = `
+  .reg-modal-wrap { width: 100%; max-width: 900px; max-height: 92vh; }
+  .reg-modal-body { display: flex; flex: 1; overflow: hidden; }
+  .reg-left { width: 280px; flex-shrink: 0; }
+  .reg-right { flex: 1; overflow-y: auto; scrollbar-width: none; }
+  .reg-right::-webkit-scrollbar { display: none; }
+  .reg-name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .reg-days-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .reg-time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .reg-form { padding: 32px 32px 28px; display: flex; flex-direction: column; gap: 22px; }
+
+  @media (max-width: 640px) {
+    .reg-modal-wrap { max-height: 94svh; border-radius: 20px 20px 0 0 !important; width: 100% !important; }
+    .reg-modal-body { flex-direction: column; }
+    .reg-left { width: 100%; flex-shrink: 0; padding: 20px 20px 16px !important; }
+    .reg-left-title { font-size: 1.55rem !important; }
+    .reg-left-perks { display: none !important; }
+    .reg-left-footer { display: none !important; }
+    .reg-left-spacer { display: none !important; }
+    .reg-right { flex: 1; min-height: 0; }
+    .reg-name-row { grid-template-columns: 1fr; }
+    .reg-days-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .reg-time-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .reg-form { padding: 20px 16px 24px; gap: 18px; }
+    .reg-time-btn { padding: 12px 6px !important; }
+    .reg-time-label { font-size: 0.7rem !important; }
+    .reg-time-sub { display: none !important; }
+  }
+
+  @media (max-width: 380px) {
+    .reg-days-grid { grid-template-columns: repeat(3, 1fr); }
+    .reg-time-grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+`;
+
 const PROGRAMS = [
   { value: "bjj-gi",   label: "BJJ GI — Traditional" },
   { value: "bjj-nogi", label: "BJJ NO-GI — No Kimono" },
@@ -64,7 +99,7 @@ export default function RegistrationModal() {
   }, [isOpen, initialProgram]);
 
   useEffect(() => {
-    if (!isOpen) { const t = setTimeout(() => { setForm(EMPTY); setSubmitted(false); }, 300); return () => clearTimeout(t); }
+    if (!isOpen) { const t = setTimeout(() => { setForm(EMPTY); setSubmitted(false); setSubmitError(""); }, 300); return () => clearTimeout(t); }
   }, [isOpen]);
 
   useEffect(() => {
@@ -78,17 +113,40 @@ export default function RegistrationModal() {
     return () => window.removeEventListener("keydown", fn);
   }, [isOpen, closeModal]);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
   const set = (f: keyof FormData) => (v: string) => setForm(p => ({ ...p, [f]: v }));
   const toggleDay = (full: string) => setForm(p => ({
     ...p,
     preferredDay: p.preferredDay === full ? "" : full,
   }));
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true); };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("server");
+      setSubmitted(true);
+    } catch {
+      setSubmitError("Something went wrong. Please try again or call us directly.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
+          <style>{RESPONSIVE_STYLES}</style>
+
           {/* Backdrop */}
           <motion.div
             key="bd"
@@ -99,18 +157,17 @@ export default function RegistrationModal() {
             onClick={closeModal}
           />
 
-          {/* Center wrapper */}
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          {/* Center wrapper — bottom-anchored on mobile */}
+          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center sm:p-4">
             <motion.div
               key="modal"
               role="dialog" aria-modal="true"
-              initial={{ opacity: 0, y: 20, scale: 0.97 }}
+              initial={{ opacity: 0, y: 30, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.97 }}
+              exit={{ opacity: 0, y: 30, scale: 0.97 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="reg-modal-wrap"
               style={{
-                width: "100%", maxWidth: 900,
-                maxHeight: "92vh",
                 background: "#0C0C0C",
                 border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: 20,
@@ -118,6 +175,7 @@ export default function RegistrationModal() {
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
+                position: "relative",
               }}
               onClick={e => e.stopPropagation()}
             >
@@ -127,29 +185,31 @@ export default function RegistrationModal() {
                 aria-label="Close"
                 style={{
                   position: "absolute", top: 14, right: 14, zIndex: 40,
-                  width: 30, height: 30, borderRadius: "50%",
+                  width: 32, height: 32, borderRadius: "50%",
                   background: "rgba(255,255,255,0.07)",
                   border: "none", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   color: "rgba(255,255,255,0.5)", transition: "all 0.15s",
                 }}
               >
-                <X size={14} />
+                <X size={15} />
               </button>
 
               {/* Body */}
-              <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+              <div className="reg-modal-body">
 
                 {/* ── LEFT PANEL ── */}
-                <div style={{
-                  width: 280, flexShrink: 0,
-                  background: "linear-gradient(170deg, #191100 0%, #0A0A0A 60%, #0D0A00 100%)",
-                  borderRight: "1px solid rgba(212,167,75,0.1)",
-                  padding: "36px 28px",
-                  display: "flex", flexDirection: "column", gap: 24,
-                  position: "relative", overflow: "hidden",
-                }}>
-                  {/* Grid */}
+                <div
+                  className="reg-left"
+                  style={{
+                    background: "linear-gradient(170deg, #191100 0%, #0A0A0A 60%, #0D0A00 100%)",
+                    borderRight: "1px solid rgba(212,167,75,0.1)",
+                    padding: "36px 28px",
+                    display: "flex", flexDirection: "column", gap: 24,
+                    position: "relative", overflow: "hidden",
+                  }}
+                >
+                  {/* Grid bg */}
                   <div style={{
                     position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.05,
                     backgroundImage: "linear-gradient(rgba(212,167,75,1) 1px,transparent 1px),linear-gradient(90deg,rgba(212,167,75,1) 1px,transparent 1px)",
@@ -175,7 +235,7 @@ export default function RegistrationModal() {
 
                     {/* Title */}
                     <div>
-                      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "2.1rem", lineHeight: 0.93, color: "white", margin: 0 }}>
+                      <h2 className="reg-left-title" style={{ fontFamily: "var(--font-display)", fontSize: "2.1rem", lineHeight: 0.93, color: "white", margin: 0 }}>
                         BOOK YOUR<br />
                         <span style={{
                           background: "linear-gradient(135deg,#EDD077,#D4A74B)",
@@ -183,12 +243,12 @@ export default function RegistrationModal() {
                         }}>FREE CLASS</span>
                       </h2>
                       <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.78rem", marginTop: 10, lineHeight: 1.6 }}>
-                        No experience needed.<br />No contracts. Just come train.
+                        No experience needed. No contracts. Just come train.
                       </p>
                     </div>
 
                     {/* Perks */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div className="reg-left-perks" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       {PERKS.map(({ Icon, text }) => (
                         <div key={text} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <div style={{
@@ -204,13 +264,11 @@ export default function RegistrationModal() {
                     </div>
 
                     {/* Spacer */}
-                    <div style={{ flex: 1 }} />
+                    <div className="reg-left-spacer" style={{ flex: 1 }} />
 
-                    {/* Divider */}
-                    <div style={{ height: 1, background: "linear-gradient(90deg,rgba(212,167,75,0.2),transparent)" }} />
-
-                    {/* Location */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {/* Divider + Location */}
+                    <div className="reg-left-footer" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div style={{ height: 1, background: "linear-gradient(90deg,rgba(212,167,75,0.2),transparent)", marginBottom: 2 }} />
                       <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                         <MapPin style={{ width: 12, height: 12, color: "rgba(212,167,75,0.5)", marginTop: 2, flexShrink: 0 }} />
                         <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.73rem", lineHeight: 1.55 }}>4612 Billingsley Blvd<br />Midland, TX 79705</span>
@@ -224,18 +282,17 @@ export default function RegistrationModal() {
                 </div>
 
                 {/* ── RIGHT PANEL ── */}
-                <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none" }}>
-                  <style>{`.reg-scroll::-webkit-scrollbar{display:none}`}</style>
+                <div className="reg-right">
 
                   {!submitted ? (
-                    <form onSubmit={handleSubmit} className="reg-scroll" style={{ padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: 22 }}>
+                    <form onSubmit={handleSubmit} className="reg-form">
 
                       {/* §1 Personal */}
                       <Section num="01" label="Personal Information">
                         <input type="text" value={form.name} onChange={e => set("name")(e.target.value)}
                           required placeholder="Full Name *" style={INPUT}
                           className="focus:border-gold/50 transition-colors placeholder-white/25" />
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                        <div className="reg-name-row">
                           <input type="email" value={form.email} onChange={e => set("email")(e.target.value)}
                             required placeholder="Email Address *" style={INPUT}
                             className="focus:border-gold/50 transition-colors placeholder-white/25" />
@@ -268,17 +325,17 @@ export default function RegistrationModal() {
                       {/* §3 Availability */}
                       <Section num="03" label="Availability">
 
-                        {/* Days — 6 columns, compact */}
+                        {/* Days */}
                         <div>
                           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", letterSpacing: "0.08em", marginBottom: 8, textTransform: "uppercase" }}>
                             Available days <span style={{ color: "#D4A74B" }}>*</span>
                           </p>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 6 }}>
+                          <div className="reg-days-grid">
                             {DAYS.map(({ short, full }) => {
                               const on = form.preferredDay === full;
                               return (
                                 <button key={full} type="button" onClick={() => toggleDay(full)} style={{
-                                  padding: "9px 4px", borderRadius: 8, fontSize: "0.69rem", fontWeight: 700,
+                                  padding: "10px 4px", borderRadius: 8, fontSize: "0.69rem", fontWeight: 700,
                                   letterSpacing: "0.05em", cursor: "pointer", transition: "all 0.14s",
                                   border: on ? "1px solid rgba(212,167,75,0.6)" : "1px solid rgba(255,255,255,0.08)",
                                   background: on ? "rgba(212,167,75,0.12)" : "rgba(255,255,255,0.02)",
@@ -295,26 +352,28 @@ export default function RegistrationModal() {
                             style={{ opacity: 0, height: 0, width: 0, position: "absolute" }} />
                         </div>
 
-                        {/* Time — 3 columns, compact */}
+                        {/* Time */}
                         <div>
                           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", letterSpacing: "0.08em", marginBottom: 8, textTransform: "uppercase" }}>
                             Preferred time <span style={{ color: "#D4A74B" }}>*</span>
                           </p>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+                          <div className="reg-time-grid">
                             {TIME_SLOTS.map(({ value, Icon, label, sub }) => {
                               const on = form.preferredTime === value;
                               return (
-                                <button key={value} type="button" onClick={() => set("preferredTime")(value)} style={{
-                                  padding: "14px 8px", borderRadius: 10,
-                                  display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-                                  cursor: "pointer", transition: "all 0.14s",
-                                  border: on ? "1px solid rgba(212,167,75,0.55)" : "1px solid rgba(255,255,255,0.08)",
-                                  background: on ? "rgba(212,167,75,0.09)" : "rgba(255,255,255,0.02)",
-                                  boxShadow: on ? "0 0 16px rgba(212,167,75,0.1)" : "none",
-                                }}>
+                                <button key={value} type="button" onClick={() => set("preferredTime")(value)}
+                                  className="reg-time-btn"
+                                  style={{
+                                    padding: "14px 8px", borderRadius: 10,
+                                    display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+                                    cursor: "pointer", transition: "all 0.14s",
+                                    border: on ? "1px solid rgba(212,167,75,0.55)" : "1px solid rgba(255,255,255,0.08)",
+                                    background: on ? "rgba(212,167,75,0.09)" : "rgba(255,255,255,0.02)",
+                                    boxShadow: on ? "0 0 16px rgba(212,167,75,0.1)" : "none",
+                                  }}>
                                   <Icon style={{ width: 16, height: 16, color: on ? "#D4A74B" : "rgba(255,255,255,0.28)" }} />
-                                  <span style={{ fontSize: "0.75rem", fontWeight: 600, color: on ? "#D4A74B" : "rgba(255,255,255,0.5)", letterSpacing: "0.03em" }}>{label}</span>
-                                  <span style={{ fontSize: "0.64rem", color: "rgba(255,255,255,0.22)" }}>{sub}</span>
+                                  <span className="reg-time-label" style={{ fontSize: "0.75rem", fontWeight: 600, color: on ? "#D4A74B" : "rgba(255,255,255,0.5)", letterSpacing: "0.03em" }}>{label}</span>
+                                  <span className="reg-time-sub" style={{ fontSize: "0.64rem", color: "rgba(255,255,255,0.22)" }}>{sub}</span>
                                 </button>
                               );
                             })}
@@ -334,11 +393,15 @@ export default function RegistrationModal() {
 
                       {/* Submit */}
                       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        <button type="submit" className="btn-predator btn-gold" style={{ width: "100%", padding: "14px 24px", fontSize: "0.82rem", letterSpacing: "0.18em" }}>
-                          BOOK MY FREE CLASS
+                        <button type="submit" disabled={submitting} className="btn-predator btn-gold"
+                          style={{ width: "100%", padding: "14px 24px", fontSize: "0.82rem", letterSpacing: "0.18em", opacity: submitting ? 0.6 : 1, cursor: submitting ? "not-allowed" : "pointer" }}>
+                          {submitting ? "SENDING…" : "BOOK MY FREE CLASS"}
                         </button>
+                        {submitError && (
+                          <p style={{ color: "#f87171", fontSize: "0.72rem", textAlign: "center" }}>{submitError}</p>
+                        )}
                         <p style={{ color: "rgba(255,255,255,0.18)", fontSize: "0.7rem", textAlign: "center" }}>
-                          We'll reach out within 24 hours to confirm your schedule.
+                          You'll get a confirmation email instantly.
                         </p>
                       </div>
 
@@ -347,7 +410,7 @@ export default function RegistrationModal() {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.93 }} animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-                      style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "60px 40px", minHeight: 400 }}
+                      style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "60px 32px", minHeight: 400 }}
                     >
                       <motion.div
                         initial={{ scale: 0, rotate: -15 }} animate={{ scale: 1, rotate: 0 }}

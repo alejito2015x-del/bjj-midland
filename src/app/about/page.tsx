@@ -275,7 +275,7 @@ export default function AboutPage() {
             <AnimatedTestimonials
               testimonials={coachTestimonials}
               autoplay
-              className="max-w-6xl py-2 md:py-3"
+              className="max-w-6xl py-4 md:py-3"
             />
           </div>
         </section>

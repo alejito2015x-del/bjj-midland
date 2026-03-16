@@ -61,14 +61,14 @@ export default function Hero() {
           style={{
             position: "absolute", inset: 0,
             width: "100%", height: "100%",
-            objectFit: "cover", objectPosition: "center 70%",
+            objectFit: "cover", objectPosition: "center 78%",
             display: "block",
             transform: "scale(1.65)",
-            transformOrigin: "center 70%",
+            transformOrigin: "center 78%",
           }}
-          autoPlay muted playsInline
+          autoPlay muted playsInline loop preload="auto"
         >
-          <source src="/images/hero-mobile-fullbody-v2.mp4" />
+          <source src="/images/hero-mobile-fullbody-v2.mp4" type="video/mp4" />
         </video>
 
         {/* Dark base overlay */}
@@ -169,8 +169,10 @@ export default function Hero() {
             autoPlay
             muted
             playsInline
+            loop
+            preload="auto"
           >
-            <source src="/images/hf_20260225_070918_2efae084-34a4-4698-ae6d-edb59749f09a.mp4" />
+            <source src="/images/hf_20260225_070918_2efae084-34a4-4698-ae6d-edb59749f09a.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/35" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background-elevated/70" />
