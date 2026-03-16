@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const dynamic = "force-dynamic";
 
 const TIME_LABELS: Record<string, { label: string; range: string }> = {
   morning:   { label: "Morning",   range: "6:00 AM – 12:00 PM" },
@@ -145,6 +145,7 @@ function buildEmail(data: {
 }
 
 export async function POST(req: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const body = await req.json();
     const { name, email, phone, program, preferredDay, preferredTime, notes } = body;
