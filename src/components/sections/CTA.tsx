@@ -7,10 +7,10 @@ import Image from "next/image";
 import { useRegistrationModal } from "@/context/RegistrationModalContext";
 
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 32 },
+  initial: { opacity: 0, y: 80 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 as const },
-  transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const, delay },
+  viewport: { once: true, amount: 0.15 as const },
+  transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const, delay },
 });
 
 export default function CTA() {
@@ -126,10 +126,10 @@ export default function CTA() {
 
           {/* Right: Visual */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: 80 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
             className="relative min-w-0"
           >
             <div className="relative mx-auto flex items-center justify-center w-full max-w-[72rem] origin-center scale-[1.28] sm:scale-[1.42] lg:scale-[1.62]">

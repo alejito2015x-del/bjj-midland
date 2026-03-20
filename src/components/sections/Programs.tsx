@@ -7,7 +7,7 @@ import Link from "next/link";
 import StaggerReveal, { StaggerItem } from "@/components/sections/StaggerReveal";
 
 const revealUp = {
-  hidden: { opacity: 0, y: 36, scale: 0.98 },
+  hidden: { opacity: 0, y: 80, scale: 0.98 },
   visible: { opacity: 1, y: 0, scale: 1 },
 };
 
@@ -190,10 +190,10 @@ export default function Programs() {
     {/* Kids & Veteran Programs */}
     <motion.section
       className="pb-6 md:pb-8 bg-background-elevated relative overflow-hidden"
-      initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 34 }}
+      initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 80 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, amount: 0.08 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
     >
       <div
         className="w-full px-6 md:px-12 relative"

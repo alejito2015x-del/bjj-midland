@@ -231,18 +231,18 @@ function PostModal({
 }
 
 // ── Tarjeta ───────────────────────────────────────────────────────────────────
-function PhotoCard({ shortcode, index, onOpen, cardW, cardH, isMobile }: {
+function PhotoCard({ shortcode, index, onOpen, cardW, cardH, isMobile, inCarousel = false }: {
   shortcode: string; index: number; onOpen: () => void;
-  cardW: number; cardH: number; isMobile: boolean;
+  cardW: number; cardH: number; isMobile: boolean; inCarousel?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const active = hovered || isMobile;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 70 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
+      initial={inCarousel ? false : { opacity: 0, y: 70 }}
+      whileInView={inCarousel ? undefined : { opacity: 1, y: 0 }}
+      viewport={inCarousel ? undefined : { once: true, margin: "-40px" }}
       transition={{ delay: Math.min(index * 0.07, 0.35), duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -338,6 +338,7 @@ export default function InstagramFeed() {
   const [mobileDir, setMobileDir] = useState(1);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  const mobileIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { w: cardW, h: cardH } = useCardSize();
 
   useEffect(() => {
@@ -371,6 +372,24 @@ export default function InstagramFeed() {
     return () => el.removeEventListener("scroll", updateArrows);
   }, []);
 
+  // Mobile autoplay
+  useEffect(() => {
+    if (!isMobile) return;
+    mobileIntervalRef.current = setInterval(() => {
+      setMobileDir(1);
+      setMobileIndex((i) => (i + 1) % POSTS.length);
+    }, 3000);
+    return () => { if (mobileIntervalRef.current) clearInterval(mobileIntervalRef.current); };
+  }, [isMobile]);
+
+  const resetMobileInterval = () => {
+    if (mobileIntervalRef.current) clearInterval(mobileIntervalRef.current);
+    mobileIntervalRef.current = setInterval(() => {
+      setMobileDir(1);
+      setMobileIndex((i) => (i + 1) % POSTS.length);
+    }, 3000);
+  };
+
   // Mobile swipe handlers — only navigate if horizontal swipe dominates
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -381,13 +400,14 @@ export default function InstagramFeed() {
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
-      if (dx < 0 && mobileIndex < POSTS.length - 1) {
+      if (dx < 0) {
         setMobileDir(1);
-        setMobileIndex((i) => i + 1);
-      } else if (dx > 0 && mobileIndex > 0) {
+        setMobileIndex((i) => (i + 1) % POSTS.length);
+      } else {
         setMobileDir(-1);
-        setMobileIndex((i) => i - 1);
+        setMobileIndex((i) => (i - 1 + POSTS.length) % POSTS.length);
       }
+      resetMobileInterval();
     }
     touchStartX.current = null;
     touchStartY.current = null;
@@ -488,7 +508,7 @@ export default function InstagramFeed() {
               height: `${mobileCardH}px`,
               overflow: "hidden",
             }}>
-              <AnimatePresence initial={false} custom={mobileDir} mode="popLayout">
+              <AnimatePresence initial={false} custom={mobileDir} mode="sync">
                 <motion.div
                   key={mobileIndex}
                   custom={mobileDir}
@@ -506,6 +526,7 @@ export default function InstagramFeed() {
                     cardW={mobileCardW}
                     cardH={mobileCardH}
                     isMobile={true}
+                    inCarousel={true}
                   />
                 </motion.div>
               </AnimatePresence>
@@ -516,7 +537,7 @@ export default function InstagramFeed() {
               {POSTS.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => { setMobileDir(i > mobileIndex ? 1 : -1); setMobileIndex(i); }}
+                  onClick={() => { setMobileDir(i > mobileIndex ? 1 : -1); setMobileIndex(i); resetMobileInterval(); }}
                   aria-label={`Post ${i + 1}`}
                   style={{
                     width: i === mobileIndex ? "20px" : "6px",

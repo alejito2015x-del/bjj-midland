@@ -217,10 +217,10 @@ export default function Testimonials() {
         <div className="flex flex-col gap-4 md:gap-5">
           {/* Eyebrow */}
           <motion.div
-            initial={{ opacity: 0, y: 32 }}
+            initial={{ opacity: 0, y: 70 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0 }}
             className="flex items-center justify-center gap-4"
           >
             <div className="h-px w-14 bg-gold/50" />
@@ -235,10 +235,10 @@ export default function Testimonials() {
 
           {/* Title */}
           <motion.div
-            initial={{ opacity: 0, y: 32 }}
+            initial={{ opacity: 0, y: 70 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             className="flex justify-center w-full"
           >
             <h2
@@ -263,10 +263,10 @@ export default function Testimonials() {
 
           {/* ── Rating badge — centered full-width strip ── */}
           <motion.div
-            initial={{ opacity: 0, y: 32 }}
+            initial={{ opacity: 0, y: 70 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="relative flex items-center justify-center overflow-hidden py-3 md:py-4 rounded-xl border border-gold/20"
             style={{
               background:

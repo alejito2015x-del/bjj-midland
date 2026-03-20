@@ -69,6 +69,8 @@ export default function ClassesPage() {
       <main className="pt-[88px]">
         {/* Hero Section */}
         <section className="relative py-24 md:py-32 overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/classes-hero-bg.png')", backgroundPosition: "15% center" }} />
+          <div className="absolute inset-0 bg-black/70" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(212,167,75,0.1),transparent)]" />
 
           <div className="relative max-w-7xl mx-auto px-6 md:px-12">
@@ -92,7 +94,7 @@ export default function ClassesPage() {
         </section>
 
         {/* Special Programs */}
-        <section className="py-20 bg-background">
+        <section className="py-10 bg-background">
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -105,21 +107,29 @@ export default function ClassesPage() {
               </h2>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="card-predator p-8 text-center">
+                <h3 className="text-xl text-white mb-3" style={{ fontFamily: 'var(--font-display)' }}>
+                  KIDS PROGRAMS
+                </h3>
+                <p className="text-text-secondary text-sm leading-relaxed text-left">
+                  Our Kids BJJ program builds confidence, discipline, and respect both on and off the mat. Lil' Ninjas (ages 4–7) introduces movement, coordination, and fun fundamentals, while our Samurai program (ages 8–14) develops real technique, competition skills, and mental toughness. Classes run Mon–Fri with small group sizes for focused coaching.
+                </p>
+              </div>
               <div className="card-predator p-8 text-center">
                 <h3 className="text-xl text-white mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                   VETERAN & LEO PROGRAMS
                 </h3>
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  We offer scholarships for veterans and law enforcement officers. We are certified as a C4C PJJ training center. Continuing education and certification available.
+                <p className="text-text-secondary text-sm leading-relaxed text-left">
+                  We honor those who serve with exclusive scholarship opportunities for active military, veterans, and law enforcement officers. Midland BJJ & MMA is a certified C4C PJJ training center, offering structured curriculum, continuing education, and official certification for professionals seeking advanced combatives training.
                 </p>
               </div>
               <div className="card-predator p-8 text-center">
                 <h3 className="text-xl text-white mb-3" style={{ fontFamily: 'var(--font-display)' }}>
                   PRIVATE TRAINING
                 </h3>
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  Private and corporate group training available. We specialize in self-defense application. Contact us for more information.
+                <p className="text-text-secondary text-sm leading-relaxed text-left">
+                  Accelerate your progress with one-on-one coaching tailored to your goals — whether you're a beginner building foundations, a competitor sharpening technique, or a team seeking specialized instruction. Corporate group sessions and self-defense seminars are also available. Contact us to schedule your first session.
                 </p>
               </div>
             </div>
@@ -127,7 +137,7 @@ export default function ClassesPage() {
         </section>
 
         {/* Schedule Section */}
-        <section id="schedule" className="py-24 bg-background-elevated">
+        <section id="schedule" className="py-12 bg-background-elevated">
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -234,7 +244,7 @@ export default function ClassesPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-24 bg-background relative overflow-hidden">
+        <section className="py-12 bg-background relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,167,75,0.05)_0%,transparent_70%)]" />
 
           <div className="max-w-4xl mx-auto px-6 md:px-12 text-center relative">
