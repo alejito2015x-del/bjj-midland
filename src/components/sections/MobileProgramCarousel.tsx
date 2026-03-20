@@ -83,6 +83,7 @@ const transition = {
 export default function MobileProgramCarousel() {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [paused, setPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -90,6 +91,11 @@ export default function MobileProgramCarousel() {
   const goTo = useCallback((next: number, dir: number) => {
     setDirection(dir);
     setIndex(next);
+  }, []);
+
+  const stopInterval = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = null;
   }, []);
 
   const resetInterval = useCallback(() => {
@@ -101,12 +107,16 @@ export default function MobileProgramCarousel() {
   }, []);
 
   useEffect(() => {
-    resetInterval();
+    if (paused) {
+      stopInterval();
+    } else {
+      resetInterval();
+    }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [resetInterval]);
+  }, [paused, resetInterval, stopInterval]);
 
-  const prev = () => { goTo((index - 1 + slides.length) % slides.length, -1); resetInterval(); };
-  const next = () => { goTo((index + 1) % slides.length, 1); resetInterval(); };
+  const prev = () => { goTo((index - 1 + slides.length) % slides.length, -1); };
+  const next = () => { goTo((index + 1) % slides.length, 1); };
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -117,10 +127,13 @@ export default function MobileProgramCarousel() {
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
-    // Only swipe if horizontal movement dominates (not a vertical scroll)
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
+      // Swipe: advance and resume autoplay
       dx < 0 ? next() : prev();
-      resetInterval();
+      setPaused(false);
+    } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+      // Tap (no movement): toggle pause
+      setPaused((p) => !p);
     }
     touchStartX.current = null;
     touchStartY.current = null;
@@ -217,34 +230,30 @@ export default function MobileProgramCarousel() {
               </h3>
             </div>
 
-            {/* Subtitle — fixed height */}
-            <div style={{ height: "2.6rem", display: "flex", alignItems: "center" }}>
-              <p
-                style={{
-                  color: "#D4A74B",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  lineHeight: 1.3,
-                  margin: 0,
-                }}
-              >
-                {slide.subtitle}
-              </p>
-            </div>
+            {/* Subtitle */}
+            <p
+              style={{
+                color: "#D4A74B",
+                fontSize: "1rem",
+                fontWeight: 600,
+                lineHeight: 1.3,
+                margin: 0,
+              }}
+            >
+              {slide.subtitle}
+            </p>
 
-            {/* Description — fixed height, clipped if too long */}
-            <div style={{ height: "4.8rem", overflow: "hidden" }}>
-              <p
-                style={{
-                  color: "rgba(255,255,255,0.78)",
-                  fontSize: "0.88rem",
-                  lineHeight: 1.6,
-                  margin: 0,
-                }}
-              >
-                {slide.description}
-              </p>
-            </div>
+            {/* Description */}
+            <p
+              style={{
+                color: "rgba(255,255,255,0.78)",
+                fontSize: "0.88rem",
+                lineHeight: 1.6,
+                margin: 0,
+              }}
+            >
+              {slide.description}
+            </p>
 
             {/* Bullets — 3 items, fixed gap */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
@@ -295,7 +304,7 @@ export default function MobileProgramCarousel() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Dot indicators */}
+      {/* Dot indicators + pause hint */}
       <div
         style={{
           display: "flex",
@@ -308,13 +317,15 @@ export default function MobileProgramCarousel() {
         {slides.map((s, i) => (
           <button
             key={s.key}
-            onClick={() => { goTo(i, i > index ? 1 : -1); resetInterval(); }}
+            onClick={() => { goTo(i, i > index ? 1 : -1); setPaused(false); }}
             aria-label={`Go to slide ${i + 1}`}
             style={{
               width: i === index ? "24px" : "8px",
               height: "8px",
               borderRadius: "4px",
-              background: i === index ? "#D4A74B" : "rgba(255,255,255,0.3)",
+              background: i === index
+                ? (paused ? "rgba(212,167,75,0.45)" : "#D4A74B")
+                : "rgba(255,255,255,0.3)",
               border: "none",
               padding: 0,
               cursor: "pointer",
@@ -322,6 +333,18 @@ export default function MobileProgramCarousel() {
             }}
           />
         ))}
+        {paused && (
+          <span style={{
+            fontSize: "9px",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.35)",
+            fontFamily: "var(--font-display)",
+            marginLeft: "4px",
+          }}>
+            Paused
+          </span>
+        )}
       </div>
     </div>
   );

@@ -61,10 +61,10 @@ export default function Hero() {
           style={{
             position: "absolute", inset: 0,
             width: "100%", height: "100%",
-            objectFit: "cover", objectPosition: "center 78%",
+            objectFit: "cover", objectPosition: "center 70%",
             display: "block",
             transform: "scale(1.65)",
-            transformOrigin: "center 78%",
+            transformOrigin: "center 70%",
           }}
           autoPlay muted playsInline loop preload="auto"
         >
