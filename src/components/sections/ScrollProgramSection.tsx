@@ -117,8 +117,9 @@ export default function ScrollProgramSection({
   mobileImage,
   mobileImagePosition,
 }: ScrollProgramSectionProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const stickyRef    = useRef<HTMLDivElement>(null);
+  const containerRef   = useRef<HTMLDivElement>(null);
+  const outerStickyRef = useRef<HTMLDivElement>(null);
+  const stickyRef      = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const durationRef = useRef(0);
@@ -134,7 +135,9 @@ export default function ScrollProgramSection({
   const scrollYProgress = useMotionValue(0);
   const entryOpacity    = useMotionValue(0.82);
   const entryScale      = useMotionValue(0.98);
-  const exitY           = useMotionValue("0vh");
+  // Ref to keep disableExitPin accessible inside lock useEffect without stale closure
+  const disableExitPinRef = useRef(disableExitPin);
+  disableExitPinRef.current = disableExitPin;
 
   const hasImageSequence = !!imageFrames && imageFrames.length > 0;
   const frameCount = imageFrames?.length ?? 0;
@@ -247,6 +250,11 @@ export default function ScrollProgramSection({
   const scheduleCanvasDrawRef = useRef(scheduleCanvasDraw);
   scheduleCanvasDrawRef.current = scheduleCanvasDraw;
 
+  // Stable ref for synchronous (non-RAF) canvas draw — used in entryOpacity
+  // subscription to avoid a one-frame blank gap when parent transform changes.
+  const drawFrameToCanvasRef = useRef(drawFrameToCanvas);
+  drawFrameToCanvasRef.current = drawFrameToCanvas;
+
   // ── Seek video whenever progress changes ─────────────────────────────────
   useEffect(() => {
     if (isMobileViewport) return;
@@ -276,18 +284,18 @@ export default function ScrollProgramSection({
   }, [frameCount, hasImageSequence, isMobileViewport, scheduleCanvasDraw, scrollYProgress]);
 
   // ── Redraw canvas when section transitions in/out of viewport ────────────
-  // The browser can drop the canvas GPU layer when the sticky div is
-  // transformed off-screen (exitY > 0). When the section re-enters,
-  // scrollYProgress still holds the same value so .on("change") never fires.
-  // Subscribing to exitY and entryOpacity ensures a redraw on every transition.
+  // The browser can drop the canvas GPU layer during position switches.
+  // When the section re-enters, scrollYProgress still holds the same value
+  // so .on("change") never fires. Subscribing to entryOpacity ensures a
+  // redraw on every transition.
+  // We draw SYNCHRONOUSLY (no RAF) here so the canvas has content in the same
+  // frame that the transform is applied — prevents a one-frame black flash.
   useEffect(() => {
     if (isMobileViewport) return;
     if (!hasImageSequence || frameCount <= 0) return;
-    const redraw = () => scheduleCanvasDrawRef.current(currentFrameRef.current);
-    const u1 = exitY.on("change", redraw);
-    const u2 = entryOpacity.on("change", redraw);
-    return () => { u1(); u2(); };
-  }, [hasImageSequence, frameCount, isMobileViewport, exitY, entryOpacity]);
+    const u2 = entryOpacity.on("change", () => drawFrameToCanvasRef.current(currentFrameRef.current));
+    return () => { u2(); };
+  }, [hasImageSequence, frameCount, isMobileViewport, entryOpacity]);
 
   // Preload sequence frames in memory for smooth scrubbing on canvas.
   useEffect(() => {
@@ -392,14 +400,34 @@ export default function ScrollProgramSection({
         entryScale.set(0.98 + 0.02 * Math.min(1, Math.max(0, rawEntry)));
       }
 
-      // Exit: counteracts the natural upward drift once sticky breaks.
-      // Can be disabled for sections that should hand off immediately.
-      if (disableExitPin) {
-        exitY.set("0vh");
-      } else {
-        const rawExit = 1 - rect.bottom / vh;
-        const exitFrac = Math.min(1, Math.max(0, rawExit));
-        exitY.set(`${exitFrac * 100}vh`);
+      // Exit phase: when the container bottom enters the viewport, CSS sticky
+      // naturally drifts the element upward. Fix this by switching to
+      // position:fixed (keeps element at top:0 regardless of scroll).
+      // Reverts to sticky when the user scrolls back up into the section.
+      // The passive scroll handler (one-frame lag) is fine here for the
+      // REVERT path because the element is already fixed by the time this
+      // fires on the entry path (set preemptively in unlockScroll).
+      if (!disableExitPin) {
+        const outerEl = outerStickyRef.current;
+        if (outerEl) {
+          const rawExit = 1 - rect.bottom / vh;
+          if (rawExit > 0) {
+            // Container is in exit phase — pin to viewport top
+            if (outerEl.style.position !== "fixed") {
+              outerEl.style.position = "fixed";
+              outerEl.style.top = "0";
+              outerEl.style.left = "0";
+              outerEl.style.width = "100%";
+            }
+            scrollYProgress.set(1);
+          } else if (outerEl.style.position === "fixed") {
+            // Back in sticky range — restore sticky positioning
+            outerEl.style.position = "sticky";
+            outerEl.style.top = "0";
+            outerEl.style.left = "";
+            outerEl.style.width = "";
+          }
+        }
       }
     };
 
@@ -411,29 +439,25 @@ export default function ScrollProgramSection({
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [isMobileViewport, scrollYProgress, entryOpacity, entryScale, exitY, instantOverlay, disableExitPin]);
+  }, [isMobileViewport, scrollYProgress, entryOpacity, entryScale, instantOverlay, disableExitPin]);
 
-  // ── Apply sticky-card styles directly to DOM ────────────────────────────
-  // motion.div with MotionValue styles doesn't reconnect after SSR hydration —
-  // the internal Framer Motion binding is not re-established on existing DOM
-  // nodes, so exitY / entryOpacity / entryScale never update on first page load.
-  // Using a plain div + direct DOM writes fixes this on both first load and SPA.
+  // ── Apply opacity + scale to inner sticky card DOM ─────────────────────
+  // All transforms are written synchronously via direct DOM manipulation in the
+  // scroll handler above — no Framer Motion render loop involved.
   useEffect(() => {
     if (isMobileViewport) return;
     const el = stickyRef.current;
     if (!el) return;
 
-    const apply = () => {
+    const applyTransforms = () => {
       el.style.opacity   = String(entryOpacity.get());
-      el.style.transform = `scale(${entryScale.get()}) translateY(${exitY.get()})`;
+      el.style.transform = `scale(${entryScale.get()})`;
     };
-
-    apply(); // Sync current values immediately on mount
-    const u1 = entryOpacity.on("change", apply);
-    const u2 = entryScale.on("change",   apply);
-    const u3 = exitY.on("change",        apply);
-    return () => { u1(); u2(); u3(); };
-  }, [isMobileViewport, entryOpacity, entryScale, exitY]);
+    applyTransforms();
+    const u1 = entryOpacity.on("change", applyTransforms);
+    const u2 = entryScale.on("change", applyTransforms);
+    return () => { u1(); u2(); };
+  }, [isMobileViewport, entryOpacity, entryScale]);
 
   // ── Lock mechanism: overflow:hidden + virtual scroll via wheel ────────────
   useEffect(() => {
@@ -444,20 +468,13 @@ export default function ScrollProgramSection({
     const container = containerRef.current;
     if (!container) return;
 
-    const html = document.documentElement;
     let isLocked = false;
     let virtualProgress = 0;
     let lockedAtScrollY = 0;
-    // Preserve scrollbar width to prevent layout shift
-    const scrollbarWidth = window.innerWidth - html.clientWidth;
 
     const releaseLock = () => {
       isLocked = false;
       isVirtualScrollLockedRef.current = false;
-      html.style.overflow = "";
-      html.style.paddingRight = "";
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
       if (activeScrollScrubOwner === animKey) activeScrollScrubOwner = null;
     };
 
@@ -474,12 +491,6 @@ export default function ScrollProgramSection({
       // (e.g. re-entering section from below with progress already at 1)
       scheduleCanvasDrawRef.current(currentFrameRef.current);
       lockedAtScrollY = window.scrollY;
-      html.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      if (scrollbarWidth > 0) {
-        html.style.paddingRight = `${scrollbarWidth}px`;
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
-      }
       return true;
     };
 
@@ -490,8 +501,23 @@ export default function ScrollProgramSection({
       const targetTop =
         // down: land at the end of the scroll range (section fully completed)
         // up:   land at the container top — section is at full opacity at
-        //       viewport top, exitY then smoothly reveals the section below
+        //       viewport top, sticky then smoothly reveals the section below
         direction === "down" ? absTop + range : Math.max(absTop, 0);
+
+      // Preemptively switch to fixed BEFORE scrollTo so the element is already
+      // pinned when the browser composites the next frame. This runs in the
+      // wheel handler (synchronous, before compositor) — unlike the passive
+      // scroll handler which fires after the compositor has already drifted the
+      // sticky element. The scroll handler reverts to sticky on scroll-up.
+      if (direction === "down" && !disableExitPinRef.current) {
+        const outerEl = outerStickyRef.current;
+        if (outerEl) {
+          outerEl.style.position = "fixed";
+          outerEl.style.top = "0";
+          outerEl.style.left = "0";
+          outerEl.style.width = "100%";
+        }
+      }
 
       releaseLock();
       window.scrollTo({ top: targetTop, behavior: "instant" as ScrollBehavior });
@@ -515,11 +541,12 @@ export default function ScrollProgramSection({
         ? Math.min(1, Math.max(0, -rect.top / range))
         : 0;
 
+      // Only lock when scrolling DOWN — ensures the user sees all frames before
+      // leaving the section. Scrolling UP is handled by the natural scroll:
+      // update() already reverses scrollYProgress which drives the canvas.
+      // Starting a lock for upward scroll causes the canvas to go black because
+      // overflow:hidden discards the GPU layer / canvas content.
       if (deltaY > 0 && currentProgress < 0.995) {
-        return lockScroll(currentProgress);
-      }
-
-      if (deltaY < 0 && currentProgress > 0.005) {
         return lockScroll(currentProgress);
       }
 
@@ -636,13 +663,22 @@ export default function ScrollProgramSection({
     return scrollYProgress.on("change", apply);
   }, [isMobileViewport, scrollYProgress]);
 
-  // Scroll hint: fades out very early
+  // Scroll hint: hides very early.
+  // IMPORTANT: CSS @keyframes animations override inline style opacity in the cascade
+  // (animation values have higher cascade priority than author declarations).
+  // Using display:none instead of opacity:0 prevents the CSS pulse animation from
+  // overriding our hide — a display:none element is never rendered regardless of animations.
   useEffect(() => {
     if (isMobileViewport) return;
     const el = hintRef.current;
     if (!el) return;
     const apply = (p: number) => {
-      el.style.opacity = String(Math.max(0, 1 - p / 0.04));
+      if (p >= 0.04) {
+        el.style.display = "none";
+      } else {
+        el.style.display = "";
+        el.style.opacity = String(Math.max(0, 1 - p / 0.04));
+      }
     };
     apply(scrollYProgress.get());
     return scrollYProgress.on("change", apply);
@@ -799,26 +835,27 @@ export default function ScrollProgramSection({
       ref={containerRef}
       id={sectionId}
       data-programs-focus={navFocusKey}
-      style={{ height: effectiveScrollHeightCss }}
+      style={{ position: "relative", height: effectiveScrollHeightCss }}
     >
-      <div
-        ref={stickyRef}
-        style={{
-          position: "sticky",
-          top: 0,
-          height: stickyViewportHeight,
-          width: "100%",
-          overflow: "hidden",
-          background: "#0A0A0A",
-          opacity: 0.82,
-          transform: "scale(0.98) translateY(0vh)",
-          willChange: "opacity, transform",
-          ...(roundedTop && {
-            clipPath: "inset(0 round 28px 28px 0px 0px)",
-            boxShadow: "0 -32px 80px rgba(0,0,0,0.9)",
-          }),
-        }}
-      >
+      {/* Outer: sticky panel. Switches to position:fixed during the exit phase
+          (when the container bottom enters the viewport) to prevent CSS sticky's
+          natural upward drift. Switch happens in the wheel handler (before
+          compositor) — the scroll handler reverts to sticky on scroll-up. */}
+      <div ref={outerStickyRef} style={{ position: "sticky", top: 0, zIndex: 0 }}>
+        {/* Inner: content wrapper — overflow, background, scale/opacity (via DOM writes) */}
+        <div
+          ref={stickyRef}
+          style={{
+            height: stickyViewportHeight,
+            width: "100%",
+            overflow: "hidden",
+            background: "#0A0A0A",
+            ...(roundedTop && {
+              clipPath: "inset(0 round 28px 28px 0px 0px)",
+              boxShadow: "0 -32px 80px rgba(0,0,0,0.9)",
+            }),
+          }}
+        >
         {/* Background media */}
         {hasImageSequence ? (
           <>
@@ -845,6 +882,8 @@ export default function ScrollProgramSection({
                 inset: 0,
                 width: "100%",
                 height: "100%",
+                willChange: "contents",
+                transform: "translateZ(0)",
               }}
             />
           </>
@@ -1041,6 +1080,7 @@ export default function ScrollProgramSection({
               animation: `${animKey}Pulse 1.5s ease-in-out infinite`,
             }}
           />
+        </div>
         </div>
       </div>
 

@@ -240,10 +240,10 @@ function PhotoCard({ shortcode, index, onOpen, cardW, cardH, isMobile }: {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 70 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ delay: Math.min(index * 0.06, 0.3), duration: 0.5 }}
+      transition={{ delay: Math.min(index * 0.07, 0.35), duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="flex-shrink-0 relative cursor-pointer"
@@ -333,6 +333,11 @@ export default function InstagramFeed() {
   const [canRight, setCanRight] = useState(true);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  // Mobile carousel state
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const [mobileDir, setMobileDir] = useState(1);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
   const { w: cardW, h: cardH } = useCardSize();
 
   useEffect(() => {
@@ -350,7 +355,7 @@ export default function InstagramFeed() {
   };
 
   const scroll = (dir: -1 | 1) => {
-    const step = isMobile ? cardW + 12 : (cardW + 14) * 2;
+    const step = (cardW + 14) * 2;
     trackRef.current?.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
@@ -365,6 +370,37 @@ export default function InstagramFeed() {
     updateArrows();
     return () => el.removeEventListener("scroll", updateArrows);
   }, []);
+
+  // Mobile swipe handlers — only navigate if horizontal swipe dominates
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
+      if (dx < 0 && mobileIndex < POSTS.length - 1) {
+        setMobileDir(1);
+        setMobileIndex((i) => i + 1);
+      } else if (dx > 0 && mobileIndex > 0) {
+        setMobileDir(-1);
+        setMobileIndex((i) => i - 1);
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  const mobileCardW = typeof window !== "undefined" ? Math.round(window.innerWidth * 0.82) : 300;
+  const mobileCardH = Math.round(mobileCardW * 1.18);
+
+  const slideVariants = {
+    enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
+  };
 
   return (
     <>
@@ -381,9 +417,8 @@ export default function InstagramFeed() {
         className="relative overflow-hidden"
         style={{
           background: "#0A0A0A",
-          marginTop: "0px",
-          paddingTop: isMobile ? "12px" : "clamp(16px, 2vw, 24px)",
-          paddingBottom: isMobile ? "8px" : "clamp(10px, 1.2vw, 16px)",
+          paddingTop: isMobile ? "24px" : "clamp(16px, 2vw, 24px)",
+          paddingBottom: isMobile ? "28px" : "clamp(10px, 1.2vw, 16px)",
         }}
       >
         {/* Textura */}
@@ -397,11 +432,11 @@ export default function InstagramFeed() {
         {/* ── Header ── */}
         <div
           className="relative text-center"
-          style={{ paddingLeft: "16px", paddingRight: "16px", marginBottom: isMobile ? "16px" : "26px" }}
+          style={{ paddingLeft: "16px", paddingRight: "16px", marginBottom: isMobile ? "20px" : "26px" }}
         >
           <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.65 }}
             className="flex items-center justify-center gap-4 mb-4"
           >
             <div style={{ height: "1px", width: "32px", background: "rgba(212,167,75,0.4)" }} />
@@ -414,8 +449,8 @@ export default function InstagramFeed() {
           </motion.div>
 
           <motion.h2
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ delay: 0.08, duration: 0.5 }}
+            initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }} transition={{ delay: 0.08, duration: 0.65 }}
             style={{
               fontFamily: "var(--font-display)",
               fontSize: isMobile ? "clamp(1.8rem, 8vw, 2.4rem)" : "clamp(2rem, 4.5vw, 3.2rem)",
@@ -426,8 +461,8 @@ export default function InstagramFeed() {
           </motion.h2>
 
           <motion.p
-            initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ delay: 0.15, duration: 0.5 }}
+            initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }} transition={{ delay: 0.15, duration: 0.65 }}
             style={{
               color: "rgba(255,255,255,0.45)",
               fontSize: isMobile ? "0.875rem" : "1rem",
@@ -439,86 +474,123 @@ export default function InstagramFeed() {
           </motion.p>
         </div>
 
-        {/* ── Carousel ── */}
-        <div className="relative w-full">
-          {/* Flechas — ocultas en mobile */}
-          {!isMobile && (
-            <>
-              <button onClick={() => scroll(-1)} aria-label="Scroll left"
-                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center"
-                style={{
-                  background: "rgba(10,10,10,0.92)", border: "1px solid rgba(212,167,75,0.35)",
-                  color: "#D4A74B", opacity: canLeft ? 1 : 0,
-                  pointerEvents: canLeft ? "auto" : "none",
-                  boxShadow: "0 0 24px rgba(212,167,75,0.2)",
-                  transition: "opacity 0.2s",
-                }}
-              ><ChevronLeft size={18} /></button>
-
-              <button onClick={() => scroll(1)} aria-label="Scroll right"
-                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center"
-                style={{
-                  background: "rgba(10,10,10,0.92)", border: "1px solid rgba(212,167,75,0.35)",
-                  color: "#D4A74B", opacity: canRight ? 1 : 0,
-                  pointerEvents: canRight ? "auto" : "none",
-                  boxShadow: "0 0 24px rgba(212,167,75,0.2)",
-                  transition: "opacity 0.2s",
-                }}
-              ><ChevronRight size={18} /></button>
-            </>
-          )}
-
-          {/* Fades laterales */}
-          <div aria-hidden className="absolute inset-y-0 left-0 w-3 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to right, #0A0A0A, transparent)" }} />
-          <div aria-hidden className="absolute inset-y-0 right-0 w-3 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to left, #0A0A0A, transparent)" }} />
-
-          {/* Track */}
+        {/* ── Mobile: single-card carousel (no overflow-x scroll) ── */}
+        {isMobile ? (
           <div
-            ref={trackRef}
-            className="flex overflow-x-auto"
-            style={{
-              scrollbarWidth: "none", msOverflowStyle: "none",
-              WebkitOverflowScrolling: "touch",
-              gap: isMobile ? "12px" : "14px",
-              paddingTop: "8px", paddingBottom: "24px",
-              paddingLeft: isMobile ? "16px" : "0px",
-              paddingRight: isMobile ? "16px" : "0px",
-              // Snap en mobile para deslizar de a una card
-              scrollSnapType: isMobile ? "x mandatory" : "none",
-            }}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
           >
-            {POSTS.map((post, i) => (
-              <div key={post.id} style={{ scrollSnapAlign: isMobile ? "start" : "none", flexShrink: 0 }}>
-                <PhotoCard
-                  shortcode={post.shortcode} index={i}
-                  onOpen={() => setActiveIndex(i)}
-                  cardW={cardW} cardH={cardH} isMobile={isMobile}
-                />
-              </div>
-            ))}
-          </div>
+            {/* Card area */}
+            <div style={{
+              position: "relative",
+              width: `${mobileCardW}px`,
+              height: `${mobileCardH}px`,
+              overflow: "hidden",
+            }}>
+              <AnimatePresence initial={false} custom={mobileDir} mode="popLayout">
+                <motion.div
+                  key={mobileIndex}
+                  custom={mobileDir}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ x: { type: "tween" as const, ease: [0.32, 0, 0.67, 0] as [number,number,number,number], duration: 0.32 }, opacity: { duration: 0.2 } }}
+                  style={{ position: "absolute", inset: 0 }}
+                >
+                  <PhotoCard
+                    shortcode={POSTS[mobileIndex].shortcode}
+                    index={mobileIndex}
+                    onOpen={() => setActiveIndex(mobileIndex)}
+                    cardW={mobileCardW}
+                    cardH={mobileCardH}
+                    isMobile={true}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-          {/* Indicador de scroll en mobile */}
-          {isMobile && (
-            <div className="flex justify-center gap-1.5 mt-1">
+            {/* Dots */}
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               {POSTS.map((_, i) => (
-                <div key={i} style={{
-                  width: "5px", height: "5px", borderRadius: "50%",
-                  background: "rgba(212,167,75,0.35)",
-                }} />
+                <button
+                  key={i}
+                  onClick={() => { setMobileDir(i > mobileIndex ? 1 : -1); setMobileIndex(i); }}
+                  aria-label={`Post ${i + 1}`}
+                  style={{
+                    width: i === mobileIndex ? "20px" : "6px",
+                    height: "6px",
+                    borderRadius: "3px",
+                    background: i === mobileIndex ? "#D4A74B" : "rgba(255,255,255,0.25)",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    transition: "width 0.3s ease, background 0.3s ease",
+                  }}
+                />
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          /* ── Desktop: horizontal scroll track ── */
+          <div className="relative w-full">
+            <button onClick={() => scroll(-1)} aria-label="Scroll left"
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(10,10,10,0.92)", border: "1px solid rgba(212,167,75,0.35)",
+                color: "#D4A74B", opacity: canLeft ? 1 : 0,
+                pointerEvents: canLeft ? "auto" : "none",
+                boxShadow: "0 0 24px rgba(212,167,75,0.2)",
+                transition: "opacity 0.2s",
+              }}
+            ><ChevronLeft size={18} /></button>
+
+            <button onClick={() => scroll(1)} aria-label="Scroll right"
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(10,10,10,0.92)", border: "1px solid rgba(212,167,75,0.35)",
+                color: "#D4A74B", opacity: canRight ? 1 : 0,
+                pointerEvents: canRight ? "auto" : "none",
+                boxShadow: "0 0 24px rgba(212,167,75,0.2)",
+                transition: "opacity 0.2s",
+              }}
+            ><ChevronRight size={18} /></button>
+
+            <div aria-hidden className="absolute inset-y-0 left-0 w-3 z-10 pointer-events-none"
+              style={{ background: "linear-gradient(to right, #0A0A0A, transparent)" }} />
+            <div aria-hidden className="absolute inset-y-0 right-0 w-3 z-10 pointer-events-none"
+              style={{ background: "linear-gradient(to left, #0A0A0A, transparent)" }} />
+
+            <div
+              ref={trackRef}
+              className="flex overflow-x-auto"
+              style={{
+                scrollbarWidth: "none", msOverflowStyle: "none",
+                WebkitOverflowScrolling: "touch",
+                gap: "14px",
+                paddingTop: "8px", paddingBottom: "24px",
+              }}
+            >
+              {POSTS.map((post, i) => (
+                <div key={post.id} style={{ flexShrink: 0 }}>
+                  <PhotoCard
+                    shortcode={post.shortcode} index={i}
+                    onOpen={() => setActiveIndex(i)}
+                    cardW={cardW} cardH={cardH} isMobile={false}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── CTA ── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ delay: 0.25, duration: 0.5 }}
+          initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }} transition={{ delay: 0.25, duration: 0.65 }}
           className="flex justify-center px-6"
-          style={{ marginTop: isMobile ? "18px" : "26px" }}
+          style={{ marginTop: isMobile ? "20px" : "26px" }}
         >
           <a
             href="https://www.instagram.com/midlandbjj/"
