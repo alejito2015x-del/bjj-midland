@@ -2,7 +2,7 @@
 
 import ScrollProgramSection from "./ScrollProgramSection";
 
-const mmaFrames = Array.from({ length: 151 }, (_, index) => {
+const mmaFrames = Array.from({ length: 88 }, (_, index) => {
   const frame = String(index + 1).padStart(3, "0");
   return `/images/mma-scroll-sequence/ezgif-frame-${frame}.jpg`;
 });

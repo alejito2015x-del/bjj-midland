@@ -6,11 +6,11 @@ export const SITE_CONFIG = {
   description: "Premier Brazilian Jiu Jitsu and MMA training center in Midland, Texas. Est. 2000.",
   phone: "(432) 555-0123",
   whatsapp: "14325550123",
-  email: "info@midlandbjjmma.com",
+  email: "Midlandbjj@yahoo.com",
   address: "4612 Billingsley Blvd, Midland, TX 79705",
   established: "2000",
   social: {
-    instagram: "@bjjmidland",
+    instagram: "@midlandbjj",
     facebook: "bjjmidland",
     youtube: "@bjjmidland",
   },
@@ -218,6 +218,7 @@ export const SCHEDULE = [
   { day: "Monday", time: "6:30 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Monday", time: "8:30 PM", class: "MMA Wrestling", type: "mma" },
   // Tuesday
+  { day: "Tuesday", time: "5:30 AM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Tuesday", time: "6:00 AM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Tuesday", time: "12:00 PM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Tuesday", time: "4:00 PM", class: "All Level JJ", type: "bjj-gi" },
@@ -233,6 +234,7 @@ export const SCHEDULE = [
   { day: "Wednesday", time: "6:30 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Wednesday", time: "8:30 PM", class: "All Level MMA", type: "mma" },
   // Thursday
+  { day: "Thursday", time: "5:30 AM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Thursday", time: "6:00 AM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Thursday", time: "12:00 PM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Thursday", time: "4:00 PM", class: "All Level JJ", type: "bjj-gi" },
@@ -252,6 +254,21 @@ export const SCHEDULE = [
   // Sunday
   { day: "Sunday", time: "1:00 PM", class: "Open Mat", type: "bjj-nogi" },
 ];
+
+const toMinutesFrom12HourTime = (time: string) => {
+  const [clock, period] = time.split(" ");
+  const [rawHours, minutes] = clock.split(":").map(Number);
+
+  let hours = rawHours;
+  if (period === "AM" && hours === 12) hours = 0;
+  if (period === "PM" && hours !== 12) hours += 12;
+
+  return hours * 60 + minutes;
+};
+
+export const SCHEDULE_TIME_SLOTS = Array.from(
+  new Set(SCHEDULE.map((entry) => entry.time))
+).sort((a, b) => toMinutesFrom12HourTime(a) - toMinutesFrom12HourTime(b));
 
 // Testimonials
 export const TESTIMONIALS = [

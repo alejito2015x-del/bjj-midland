@@ -12,7 +12,7 @@ export default function ScrollSections() {
       <ChoosePathSection />
 
       {/* Mobile: horizontal slideshow carousel */}
-      <div className="block lg:hidden">
+      <div id="programs" className="block lg:hidden">
         <MobileProgramCarousel />
       </div>
 

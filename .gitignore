@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# large generated assets (frame sequences)
+public/images/mma-scroll-sequence/
+public/images/nogi-scroll-sequence/
+
+# test artifacts
+testsprite_tests/

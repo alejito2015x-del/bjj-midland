@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { name: "HOME", href: "/#hero" },
   { name: "PROGRAMS", href: "/#programs" },
   { name: "SCHEDULE", href: "/#schedule" },
+  { name: "GALLERY", href: "/gallery" },
   { name: "ABOUT", href: "/about" },
   { name: "CONTACT", href: "/contact" },
 ];
@@ -28,17 +29,19 @@ export default function Navbar() {
   const { openModal } = useRegistrationModal();
 
   const scrollToProgramsFocus = useCallback(() => {
-    const target =
-      document.querySelector<HTMLElement>('[data-programs-focus="gi"]') ??
-      document.querySelector<HTMLElement>(PROGRAMS_HASH);
+    const focusEl = document.querySelector<HTMLElement>('[data-programs-focus="gi"]');
+    // Skip hidden elements (e.g. desktop section hidden on mobile via display:none)
+    const isRendered = focusEl && focusEl.getBoundingClientRect().height > 0;
+    const target = (isRendered ? focusEl : null) ?? document.querySelector<HTMLElement>(PROGRAMS_HASH);
 
     if (!target) return false;
 
     const rect = target.getBoundingClientRect();
     const absTop = window.scrollY + rect.top;
     const range = Math.max(0, target.offsetHeight - window.innerHeight);
+    const offset = isRendered ? NAV_SCROLL_OFFSET : 56;
     const targetTop =
-      range > 0 ? absTop + range * PROGRAMS_FOCUS_PROGRESS : absTop - NAV_SCROLL_OFFSET;
+      range > 0 ? absTop + range * PROGRAMS_FOCUS_PROGRESS : absTop - offset;
 
     window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
     if (window.location.hash !== PROGRAMS_HASH) {
@@ -134,7 +137,7 @@ export default function Navbar() {
             onClick={(e) => handleNavClick(e, "/#hero")}
             className="relative z-50 flex items-center gap-2 md:gap-3 group"
           >
-            <div className="relative w-14 h-14 sm:w-16 sm:h-16 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-[1.02]">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-[1.02]">
               <Image
                 src="/images/logo-nav-v5.png"
                 alt="Midland BJJ & MMA"
@@ -145,7 +148,7 @@ export default function Navbar() {
               />
             </div>
             <span
-              className="hidden lg:block text-white text-lg xl:text-3xl tracking-tight"
+              className="hidden lg:block text-white text-xl xl:text-2xl tracking-tight whitespace-nowrap"
               style={{ fontFamily: "var(--font-display)" }}
             >
               MIDLAND <span className="text-gold">BJJ/MMA</span>
@@ -153,7 +156,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <div className="hidden lg:flex items-center gap-4 xl:gap-6">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -168,18 +171,18 @@ export default function Navbar() {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-5">
+          <div className="hidden lg:flex items-center gap-4">
             <a
               href="tel:+14325550123"
-              className="flex items-center gap-2 text-text-secondary hover:text-gold transition-colors"
+              className="flex items-center gap-1.5 text-text-secondary hover:text-gold transition-colors whitespace-nowrap"
             >
-              <Phone className="w-4 h-4" />
+              <Phone className="w-3.5 h-3.5" />
               <span className="text-xs tracking-wider">(432) 555-0123</span>
             </a>
             <Link
               href="/contact"
               onClick={(e) => { e.preventDefault(); openModal("trial"); }}
-              className="btn-predator btn-gold px-6 py-3 text-sm"
+              className="btn-predator btn-gold px-4 py-2 text-xs whitespace-nowrap"
             >
               FREE TRIAL
             </Link>

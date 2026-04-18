@@ -21,7 +21,7 @@ const PROGRAMS = [
 ];
 
 const SOCIALS = [
-  { name: "Instagram", href: "https://instagram.com/bjjmidland", icon: Instagram },
+  { name: "Instagram", href: "https://www.instagram.com/midlandbjj/", icon: Instagram },
   { name: "Facebook", href: "https://facebook.com/bjjmidland", icon: Facebook },
   { name: "YouTube", href: "https://youtube.com/@bjjmidland", icon: Youtube },
 ];
@@ -152,11 +152,11 @@ export default function Footer() {
                     (432) 555-0123
                   </a>
                   <a
-                    href="mailto:info@midlandbjjmma.com"
+                    href="mailto:Midlandbjj@yahoo.com"
                     className="flex items-center justify-center gap-2.5 text-text-secondary hover:text-gold transition-colors text-[0.95rem] leading-tight"
                   >
                     <Mail className="w-4 h-4 text-gold" />
-                    info@midlandbjjmma.com
+                    Midlandbjj@yahoo.com
                   </a>
                   <div className="flex items-start justify-center gap-2.5 text-text-secondary text-[0.95rem] leading-tight">
                     <MapPin className="w-4 h-4 text-gold flex-shrink-0" />
@@ -232,11 +232,11 @@ export default function Footer() {
                 (432) 555-0123
               </a>
               <a
-                href="mailto:info@midlandbjjmma.com"
+                href="mailto:Midlandbjj@yahoo.com"
                 className="flex items-center justify-center md:justify-start gap-3 text-text-secondary hover:text-gold transition-colors text-sm"
               >
                 <Mail className="w-4 h-4 text-gold" />
-                info@midlandbjjmma.com
+                Midlandbjj@yahoo.com
               </a>
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3 text-text-secondary text-sm">
                 <MapPin className="w-4 h-4 text-gold flex-shrink-0" />

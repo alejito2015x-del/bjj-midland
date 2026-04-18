@@ -58,6 +58,7 @@ export default function Hero() {
         {/* Video — full screen background */}
         <video
           ref={videoRef}
+          poster="/images/hero-mobile-black-fill-20260311.jpg"
           style={{
             position: "absolute", inset: 0,
             width: "100%", height: "100%",
@@ -165,6 +166,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-black">
           <video
             ref={videoRef}
+            poster="/images/hero-desktop-poster.jpeg"
             className="absolute inset-0 w-full h-full object-cover object-center"
             autoPlay
             muted

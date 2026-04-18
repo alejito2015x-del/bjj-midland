@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { PROGRAMS, SCHEDULE } from "@/lib/constants";
+import { PROGRAMS, SCHEDULE, SCHEDULE_TIME_SLOTS } from "@/lib/constants";
 import { ArrowRight } from "lucide-react";
 
 const colorClasses = {
@@ -25,19 +25,6 @@ const dayAccentClasses: Record<string, string> = {
   Friday: "bg-neon-magenta/80",
   Saturday: "bg-neon-cyan/70",
 };
-
-const timeSlots = [
-  "6:00 AM",
-  "11:00 AM",
-  "12:00 PM",
-  "1:00 PM",
-  "3:00 PM",
-  "4:00 PM",
-  "5:00 PM",
-  "5:40 PM",
-  "6:30 PM",
-  "8:30 PM",
-];
 
 const getSchedulePillClass = (className: string, type: string) => {
   const normalized = className.toLowerCase();
@@ -202,7 +189,7 @@ export default function ClassesPage() {
                     </div>
                   ))}
 
-                  {timeSlots.map((time) => (
+                  {SCHEDULE_TIME_SLOTS.map((time) => (
                     <div key={`row-${time}`} className="contents">
                       <div className="border-r border-white/10 border-b border-white/10 px-4 py-3 text-white/65 text-xs tracking-wider">
                         {time}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PROGRAMS, SCHEDULE } from "@/lib/constants";
+import { PROGRAMS, SCHEDULE, SCHEDULE_TIME_SLOTS } from "@/lib/constants";
 import { Clock, ChevronDown, ChevronUp, Flame } from "lucide-react";
 import clsx from "clsx";
 import { useSearchParams } from "next/navigation";
@@ -46,11 +46,6 @@ const dayAbbr: Record<string, string> = {
   Sunday: "SUN", Monday: "MON", Tuesday: "TUE", Wednesday: "WED",
   Thursday: "THU", Friday: "FRI", Saturday: "SAT",
 };
-
-const timeSlots = [
-  "6:00 AM", "11:00 AM", "12:00 PM", "1:00 PM",
-  "3:00 PM", "4:00 PM", "5:00 PM", "5:40 PM", "6:30 PM", "8:30 PM",
-];
 
 const FILTER_OPTIONS = [
   { id: "all", label: "ALL", color: "from-gold via-gold-light to-gold" },
@@ -117,7 +112,7 @@ export default function SchedulePoster() {
   }, [activeFilter]);
 
   const filteredTimeSlots = useMemo(() => {
-    return timeSlots.filter((time) =>
+    return SCHEDULE_TIME_SLOTS.filter((time) =>
       filteredSchedule.some((s) => s.time === time)
     );
   }, [filteredSchedule]);

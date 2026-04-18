@@ -235,16 +235,16 @@ export default function Programs() {
             </motion.div>
             {/* Content */}
             <motion.div
-              className="px-6 pt-8 pb-6 sm:px-8 sm:pt-10 sm:pb-8 md:px-20 md:py-24 flex flex-col items-center justify-center gap-6 md:gap-10 text-center md:w-1/2"
+              className="px-6 pt-3 pb-6 sm:px-8 sm:pt-6 sm:pb-8 md:px-20 md:py-24 flex flex-col items-center justify-center gap-6 md:gap-10 text-center md:w-1/2"
               initial={{ opacity: 0, x: 24 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.45 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               <StaggerReveal className="flex flex-col items-center gap-6 md:gap-10 w-full">
-                <StaggerItem>
+                <StaggerItem className="hidden md:block">
                   <h3
-                    className="hidden md:block text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
+                    className="text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
                     KIDS & YOUTH PROGRAMS
@@ -308,16 +308,16 @@ export default function Programs() {
             </motion.div>
             {/* Content — shown third on mobile, left side on desktop */}
             <motion.div
-              className="px-6 py-10 sm:px-8 sm:py-12 md:px-20 md:py-24 flex flex-col items-center justify-center gap-6 md:gap-10 text-center md:w-1/2 order-3 md:order-none"
+              className="px-6 pt-3 pb-10 sm:px-8 sm:pt-6 sm:pb-12 md:px-20 md:py-24 flex flex-col items-center justify-center gap-6 md:gap-10 text-center md:w-1/2 order-3 md:order-none"
               initial={{ opacity: 0, x: -24 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.45 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               <StaggerReveal className="flex flex-col items-center gap-6 md:gap-10 w-full">
-                <StaggerItem>
+                <StaggerItem className="hidden md:block">
                   <h3
-                    className="hidden md:block text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
+                    className="text-white leading-[0.92] text-[clamp(2.2rem,10.5vw,3.2rem)] md:text-5xl lg:text-6xl"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
                     VETERAN & LEO PROGRAMS
@@ -341,8 +341,6 @@ export default function Programs() {
             </motion.div>
           </div>
         </motion.div>
-        {/* Cover only the bottom gold border of the Veteran section on mobile */}
-        <div className="md:hidden h-px" style={{ background: "var(--background-elevated)", marginTop: "-1px" }} />
 
         <div className="h-6 md:h-8" />
 

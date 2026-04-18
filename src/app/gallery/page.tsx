@@ -6,19 +6,18 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { IMAGES } from "@/lib/constants";
 import { X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
-// Gallery images using available images
 const galleryImages = [
-  IMAGES.hero,
-  IMAGES.bjjGi,
-  IMAGES.bjjNoGi,
-  IMAGES.jaguar,
-  IMAGES.hero,
-  IMAGES.bjjGi,
-  IMAGES.bjjNoGi,
-  IMAGES.jaguar,
+  "/images/gallery/gallery-01.png",
+  "/images/gallery/gallery-02.png",
+  "/images/gallery/gallery-03.png",
+  "/images/gallery/gallery-04.png",
+  "/images/gallery/gallery-05.png",
+  "/images/gallery/gallery-06.png",
+  "/images/gallery/gallery-07.png",
+  "/images/gallery/gallery-08.png",
+  "/images/gallery/gallery-09.png",
 ];
 
 export default function GalleryPage() {
@@ -46,9 +45,18 @@ export default function GalleryPage() {
       <main className="pt-[88px]">
         {/* Hero Section */}
         <section className="relative py-24 md:py-32 overflow-hidden">
+          <Image
+            src="/images/gallery-hero-bg.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-black/60" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(212,167,75,0.1),transparent)]" />
 
-          <div className="relative max-w-7xl mx-auto px-6 md:px-12">
+          <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

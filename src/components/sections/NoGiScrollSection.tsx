@@ -2,7 +2,7 @@
 
 import ScrollProgramSection from "./ScrollProgramSection";
 
-const noGiFrames = Array.from({ length: 151 }, (_, index) => {
+const noGiFrames = Array.from({ length: 141 }, (_, index) => {
   const frame = String(index + 1).padStart(3, "0");
   return `/images/nogi-scroll-sequence/ezgif-frame-${frame}.jpg`;
 });

@@ -427,17 +427,24 @@ export default function Testimonials() {
             </div>
 
             {/* Quote body — altura fija para que el card no cambie de tamaño entre reviews */}
-            <blockquote
-              style={{
-                color: "rgba(255,255,255,0.84)",
-                fontSize: "clamp(1rem, 1.35vw, 1.22rem)",
-                lineHeight: "1.65",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                minHeight: "clamp(90px, 7vw, 128px)",
-              }}
-            >
-              {t.content}
-            </blockquote>
+            <div style={{ position: "relative", height: "clamp(260px, 45vw, 200px)", overflow: "hidden" }}>
+              <blockquote
+                style={{
+                  color: "rgba(255,255,255,0.84)",
+                  fontSize: "clamp(1rem, 1.35vw, 1.22rem)",
+                  lineHeight: "1.65",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                }}
+              >
+                {t.content}
+              </blockquote>
+              {/* Fade para reviews largas */}
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, height: "48px",
+                background: "linear-gradient(to top, rgba(18,18,18,0.95), transparent)",
+                pointerEvents: "none",
+              }} />
+            </div>
 
             {/* Closing quote */}
             <div

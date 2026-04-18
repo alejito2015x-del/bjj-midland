@@ -128,9 +128,10 @@ export default function MobileProgramCarousel() {
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
-      // Swipe: advance and resume autoplay
+      // Swipe: advance and reset the timer from scratch
       dx < 0 ? next() : prev();
       setPaused(false);
+      resetInterval();
     } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
       // Tap (no movement): toggle pause
       setPaused((p) => !p);
@@ -317,7 +318,7 @@ export default function MobileProgramCarousel() {
         {slides.map((s, i) => (
           <button
             key={s.key}
-            onClick={() => { goTo(i, i > index ? 1 : -1); setPaused(false); }}
+            onClick={() => { goTo(i, i > index ? 1 : -1); setPaused(false); resetInterval(); }}
             aria-label={`Go to slide ${i + 1}`}
             style={{
               width: i === index ? "24px" : "8px",

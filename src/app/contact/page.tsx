@@ -55,7 +55,7 @@ export default function ContactPage() {
               fill
               priority
               sizes="100vw"
-              className="object-cover object-center scale-[1.1] translate-y-8 md:translate-y-10"
+              className="object-cover [object-position:15%_30%]"
             />
           </div>
           <div className="absolute inset-0 bg-black/70" />
@@ -100,7 +100,7 @@ export default function ContactPage() {
         </section>
 
         {/* Contact Section */}
-        <section className="py-24 border-t border-gold/15" style={{ background: "#0d0d0d" }}>
+        <section className="py-12 border-t border-gold/15" style={{ background: "#0d0d0d" }}>
           <div className="max-w-[1200px] mx-auto px-6 md:px-[60px]">
             <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-8 lg:gap-[60px]">
 
@@ -247,7 +247,7 @@ export default function ContactPage() {
                           </div>
                           <div>
                             <label htmlFor="phone" className="block text-white text-xs font-semibold tracking-wide uppercase mb-2">
-                              Phone
+                              Phone <span className="text-text-muted normal-case tracking-normal font-normal">(optional)</span>
                             </label>
                             <input
                               type="tel"

@@ -232,7 +232,7 @@ function PostModal({
 
 // ── Tarjeta ───────────────────────────────────────────────────────────────────
 function PhotoCard({ shortcode, index, onOpen, cardW, cardH, isMobile, inCarousel = false }: {
-  shortcode: string; index: number; onOpen: () => void;
+  shortcode: string; index: number; onOpen: (url: string) => void;
   cardW: number; cardH: number; isMobile: boolean; inCarousel?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -247,7 +247,7 @@ function PhotoCard({ shortcode, index, onOpen, cardW, cardH, isMobile, inCarouse
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="flex-shrink-0 relative cursor-pointer"
-      onClick={onOpen}
+      onClick={() => onOpen(`https://www.instagram.com/p/${shortcode}/`)}
       style={{
         width: `${cardW}px`, height: `${cardH}px`,
         borderRadius: "14px", overflow: "hidden",
@@ -356,7 +356,7 @@ export default function InstagramFeed() {
   };
 
   const scroll = (dir: -1 | 1) => {
-    const step = (cardW + 14) * 2;
+    const step = cardW + 14;
     trackRef.current?.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
@@ -522,7 +522,7 @@ export default function InstagramFeed() {
                   <PhotoCard
                     shortcode={POSTS[mobileIndex].shortcode}
                     index={mobileIndex}
-                    onOpen={() => setActiveIndex(mobileIndex)}
+                    onOpen={(url) => window.open(url, "_blank", "noopener,noreferrer")}
                     cardW={mobileCardW}
                     cardH={mobileCardH}
                     isMobile={true}
@@ -591,14 +591,17 @@ export default function InstagramFeed() {
                 WebkitOverflowScrolling: "touch",
                 gap: "14px",
                 paddingTop: "8px", paddingBottom: "24px",
+                overflowY: "hidden",
+                scrollSnapType: "x mandatory",
               }}
             >
               {POSTS.map((post, i) => (
-                <div key={post.id} style={{ flexShrink: 0 }}>
+                <div key={post.id} style={{ flexShrink: 0, scrollSnapAlign: "start" }}>
                   <PhotoCard
                     shortcode={post.shortcode} index={i}
-                    onOpen={() => setActiveIndex(i)}
+                    onOpen={(url) => window.open(url, "_blank", "noopener,noreferrer")}
                     cardW={cardW} cardH={cardH} isMobile={false}
+                    inCarousel={true}
                   />
                 </div>
               ))}
