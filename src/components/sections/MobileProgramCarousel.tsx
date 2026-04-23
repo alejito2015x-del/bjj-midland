@@ -21,8 +21,8 @@ const slides = [
     ],
     ctaText: "View GI Schedule",
     ctaHref: "/?scheduleFilter=bjj-gi#schedule",
-    image: "/images/bjj-gi-mobile.png",
-    imagePosition: "center top",
+    image: "/images/bjj-gi-mobile-v2.jpg",
+    imagePosition: "center 55%",
   },
   {
     key: "nogi",

@@ -210,7 +210,6 @@ export const PRICING_PLANS = [
 // Schedule
 export const SCHEDULE = [
   // Monday
-  { day: "Monday", time: "6:00 AM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Monday", time: "12:00 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Monday", time: "4:00 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Monday", time: "5:00 PM", class: "Lil' Ninjas", type: "kids" },
@@ -219,7 +218,6 @@ export const SCHEDULE = [
   { day: "Monday", time: "8:30 PM", class: "MMA Wrestling", type: "mma" },
   // Tuesday
   { day: "Tuesday", time: "5:30 AM", class: "All Level NoGi", type: "bjj-nogi" },
-  { day: "Tuesday", time: "6:00 AM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Tuesday", time: "12:00 PM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Tuesday", time: "4:00 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Tuesday", time: "5:00 PM", class: "Lil' Ninja NoGi", type: "kids" },
@@ -235,7 +233,6 @@ export const SCHEDULE = [
   { day: "Wednesday", time: "8:30 PM", class: "All Level MMA", type: "mma" },
   // Thursday
   { day: "Thursday", time: "5:30 AM", class: "All Level NoGi", type: "bjj-nogi" },
-  { day: "Thursday", time: "6:00 AM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Thursday", time: "12:00 PM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Thursday", time: "4:00 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Thursday", time: "5:00 PM", class: "Lil' Ninja NoGi", type: "kids" },
