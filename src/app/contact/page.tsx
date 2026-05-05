@@ -256,7 +256,7 @@ export default function ContactPage() {
                               value={formData.phone}
                               onChange={handleChange}
                               className="w-full h-12 px-4 bg-background border border-border text-white placeholder-text-muted focus:outline-none focus:border-gold transition-colors"
-                              placeholder="(432) 555-0123"
+                              placeholder="(432) 305-9480"
                             />
                           </div>
                         </div>
