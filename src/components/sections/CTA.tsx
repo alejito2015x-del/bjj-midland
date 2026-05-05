@@ -88,7 +88,7 @@ export default function CTA() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <a
-                href="tel:+14325550123"
+                href="tel:+14323059480"
                 className="btn-predator btn-outline-gold px-10 py-5 text-lg"
               >
                 <Phone className="w-5 h-5" />

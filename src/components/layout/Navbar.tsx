@@ -173,11 +173,11 @@ export default function Navbar() {
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-4">
             <a
-              href="tel:+14325550123"
+              href="tel:+14323059480"
               className="flex items-center gap-1.5 text-text-secondary hover:text-gold transition-colors whitespace-nowrap"
             >
               <Phone className="w-3.5 h-3.5" />
-              <span className="text-xs tracking-wider">(432) 555-0123</span>
+              <span className="text-xs tracking-wider">(432) 305-9480</span>
             </a>
             <Link
               href="/contact"
@@ -270,11 +270,11 @@ export default function Navbar() {
                   START FREE TRIAL
                 </Link>
                 <a
-                  href="tel:+14325550123"
+                  href="tel:+14323059480"
                   className="flex items-center gap-2 text-gold"
                 >
                   <Phone className="w-5 h-5" />
-                  <span className="text-base sm:text-lg tracking-wider">(432) 555-0123</span>
+                  <span className="text-base sm:text-lg tracking-wider">(432) 305-9480</span>
                 </a>
               </motion.div>
 
