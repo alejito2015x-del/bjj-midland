@@ -18,165 +18,123 @@ const PROGRAM_LABELS: Record<string, string> = {
   "private": "Private Lessons",
 };
 
-function buildEmail(data: {
-  name: string;
-  program: string;
-  preferredDay: string;
-  preferredTime: string;
-}): string {
-  const firstName = data.name.split(" ")[0];
-  const program = PROGRAM_LABELS[data.program] ?? data.program;
-  const time = TIME_LABELS[data.preferredTime] ?? { label: data.preferredTime, range: "" };
+const GYM_EMAIL = "Midlandbjj@yahoo.com";
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your Free Class is Booked!</title>
-</head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 16px;">
-    <tr>
-      <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#111111;border-radius:16px;overflow:hidden;border:1px solid rgba(212,167,75,0.15);">
+const ALLOWED_ORIGINS = [
+  "https://midlandbjj.com",
+  "https://midlandbjjmma.com",
+  "https://bjj-midland.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
 
-          <!-- Header bar -->
-          <tr>
-            <td style="background:linear-gradient(135deg,#191100,#0d0d0d);padding:36px 40px 32px;text-align:center;border-bottom:1px solid rgba(212,167,75,0.12);">
-              <!-- Logo text -->
-              <p style="margin:0 0 20px;color:rgba(212,167,75,0.7);font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;">MIDLAND BJJ &amp; MMA</p>
-              <!-- Big title -->
-              <h1 style="margin:0;color:#ffffff;font-size:38px;font-weight:900;letter-spacing:-0.01em;line-height:1;text-transform:uppercase;">
-                YOU'RE<br/>
-                <span style="background:linear-gradient(135deg,#EDD077,#D4A74B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ON THE MATS.</span>
-              </h1>
-              <p style="margin:16px 0 0;color:rgba(255,255,255,0.42);font-size:14px;line-height:1.6;">
-                Your free class has been confirmed, ${firstName}.<br/>We'll see you soon.
-              </p>
-            </td>
-          </tr>
+const MAX_BODY_BYTES = 4000;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX = 5;
 
-          <!-- Details card -->
-          <tr>
-            <td style="padding:32px 40px;">
+const rateBuckets = new Map<string, number[]>();
 
-              <!-- Day + Time block -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-                <tr>
-                  <td style="background:rgba(212,167,75,0.06);border:1px solid rgba(212,167,75,0.15);border-radius:12px;padding:22px 24px;">
-                    <p style="margin:0 0 16px;color:rgba(255,255,255,0.3);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;">Your Session</p>
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td width="50%" style="padding-right:12px;">
-                          <p style="margin:0 0 4px;color:rgba(212,167,75,0.6);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Day</p>
-                          <p style="margin:0;color:#ffffff;font-size:20px;font-weight:800;text-transform:uppercase;">${data.preferredDay}</p>
-                        </td>
-                        <td width="50%" style="border-left:1px solid rgba(255,255,255,0.07);padding-left:12px;">
-                          <p style="margin:0 0 4px;color:rgba(212,167,75,0.6);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">${time.label}</p>
-                          <p style="margin:0;color:#ffffff;font-size:16px;font-weight:700;">${time.range}</p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+function checkRate(ip: string): boolean {
+  const now = Date.now();
+  const bucket = (rateBuckets.get(ip) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (bucket.length >= RATE_LIMIT_MAX) {
+    rateBuckets.set(ip, bucket);
+    return false;
+  }
+  bucket.push(now);
+  rateBuckets.set(ip, bucket);
+  if (rateBuckets.size > 1000) {
+    for (const [k, v] of rateBuckets.entries()) {
+      if (v.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) rateBuckets.delete(k);
+    }
+  }
+  return true;
+}
 
-              <!-- Program -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-                <tr>
-                  <td style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;">
-                    <p style="margin:0 0 4px;color:rgba(212,167,75,0.6);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Program</p>
-                    <p style="margin:0;color:#ffffff;font-size:15px;font-weight:600;">${program}</p>
-                  </td>
-                </tr>
-              </table>
+const HTML_ESCAPE_MAP: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
 
-              <!-- What to bring -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-                <tr>
-                  <td style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;">
-                    <p style="margin:0 0 12px;color:rgba(255,255,255,0.3);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;">What to bring</p>
-                    <p style="margin:0 0 6px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.7;">
-                      ✓ &nbsp;Comfortable workout clothes<br/>
-                      ✓ &nbsp;Water bottle<br/>
-                      ✓ &nbsp;Clean feet &amp; trimmed nails<br/>
-                      ✓ &nbsp;Your fighting spirit
-                    </p>
-                  </td>
-                </tr>
-              </table>
+const escapeHtml = (s: string) => String(s).replace(/[&<>"']/g, (c) => HTML_ESCAPE_MAP[c]);
 
-              <!-- Location -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
-                <tr>
-                  <td align="center" style="padding:18px 20px;background:rgba(212,167,75,0.04);border:1px solid rgba(212,167,75,0.1);border-radius:10px;">
-                    <p style="margin:0 0 2px;color:rgba(212,167,75,0.7);font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Where to go</p>
-                    <p style="margin:0;color:rgba(255,255,255,0.6);font-size:14px;line-height:1.6;">4612 Billingsley Blvd · Midland, TX 79705</p>
-                    <p style="margin:4px 0 0;color:rgba(255,255,255,0.3);font-size:12px;">Mon–Fri 6am–9pm &nbsp;·&nbsp; Sat 8am–2pm</p>
-                  </td>
-                </tr>
-              </table>
+const stripCRLF = (s: string) => String(s).replace(/[\r\n]+/g, " ").trim();
 
-              <!-- CTA note -->
-              <p style="margin:0;color:rgba(255,255,255,0.25);font-size:12px;text-align:center;line-height:1.7;">
-                Questions? Reply to this email or call us directly.<br/>
-                We'll also reach out to confirm the details before your class.
-              </p>
+function isNonEmptyString(v: unknown, max: number): v is string {
+  return typeof v === "string" && v.trim().length > 0 && v.length <= max;
+}
 
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.05);text-align:center;">
-              <p style="margin:0;color:rgba(255,255,255,0.15);font-size:11px;letter-spacing:0.1em;">
-                MIDLAND BJJ &amp; MMA &nbsp;·&nbsp; STAY RELENTLESS
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+function isValidEmail(v: unknown): v is string {
+  return typeof v === "string" && v.length <= 120 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
 export async function POST(req: Request) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) {
+    console.error("RESEND_API_KEY missing");
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+  }
+
+  const origin = req.headers.get("origin");
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const ip = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+  if (!checkRate(ip)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
+  const raw = await req.text();
+  if (raw.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
+
+  let body: unknown;
   try {
-    const body = await req.json();
-    const { name, email, phone, program, preferredDay, preferredTime, notes } = body;
+    body = JSON.parse(raw);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
-    if (!name || !email || !phone || !program || !preferredDay || !preferredTime) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+  if (typeof body !== "object" || body === null) {
+    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  }
 
-    const firstName = name.split(" ")[0];
-    const time = TIME_LABELS[preferredTime] ?? { label: preferredTime, range: "" };
+  const b = body as Record<string, unknown>;
+  const { name, email, phone, program, preferredDay, preferredTime, notes } = b;
 
+  if (!isNonEmptyString(name, 80))         return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+  if (!isValidEmail(email))                return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+  if (!isNonEmptyString(phone, 30))        return NextResponse.json({ error: "Invalid phone" }, { status: 400 });
+  if (typeof program !== "string" || !(program in PROGRAM_LABELS)) {
+    return NextResponse.json({ error: "Invalid program" }, { status: 400 });
+  }
+  if (!isNonEmptyString(preferredDay, 20)) return NextResponse.json({ error: "Invalid preferredDay" }, { status: 400 });
+  if (typeof preferredTime !== "string" || !(preferredTime in TIME_LABELS)) {
+    return NextResponse.json({ error: "Invalid preferredTime" }, { status: 400 });
+  }
+  if (notes !== undefined && notes !== null && (typeof notes !== "string" || notes.length > 500)) {
+    return NextResponse.json({ error: "Invalid notes" }, { status: 400 });
+  }
+
+  const time = TIME_LABELS[preferredTime];
+  const safeNotes = typeof notes === "string" && notes.trim().length > 0 ? notes : "—";
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
-      from: "Midland BJJ & MMA <onboarding@resend.dev>",
-      to: [email],
-      subject: `${firstName}, you're on the mats — Free Class Confirmed`,
-      html: buildEmail({ name, program, preferredDay, preferredTime }),
+      from: "Midland BJJ Website <onboarding@resend.dev>",
+      to: [GYM_EMAIL],
+      subject: `New free class booking — ${stripCRLF(name)}`,
+      html: `<p><b>Name:</b> ${escapeHtml(name)}<br/><b>Email:</b> ${escapeHtml(email)}<br/><b>Phone:</b> ${escapeHtml(phone)}<br/><b>Program:</b> ${escapeHtml(PROGRAM_LABELS[program])}<br/><b>Day:</b> ${escapeHtml(preferredDay)}<br/><b>Time:</b> ${escapeHtml(time.label)} (${escapeHtml(time.range)})<br/><b>Notes:</b> ${escapeHtml(safeNotes)}</p>`,
     });
 
     if (error) {
       console.error("Resend error:", error);
       return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
-    }
-
-    // Optional: notify the gym staff
-    if (process.env.GYM_NOTIFY_EMAIL) {
-      await resend.emails.send({
-        from: "Midland BJJ Website <onboarding@resend.dev>",
-        to: [process.env.GYM_NOTIFY_EMAIL],
-        subject: `New free class booking — ${name}`,
-        html: `<p><b>Name:</b> ${name}<br/><b>Email:</b> ${email}<br/><b>Phone:</b> ${phone}<br/><b>Program:</b> ${PROGRAM_LABELS[program] ?? program}<br/><b>Day:</b> ${preferredDay}<br/><b>Time:</b> ${time.label} (${time.range})<br/><b>Notes:</b> ${notes || "—"}</p>`,
-      });
     }
 
     return NextResponse.json({ ok: true });
