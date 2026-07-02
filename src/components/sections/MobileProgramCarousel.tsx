@@ -38,7 +38,7 @@ const slides = [
     ],
     ctaText: "View NO-GI Schedule",
     ctaHref: "/?scheduleFilter=bjj-nogi#schedule",
-    image: "/images/bjj-nogi-mobile.png",
+    image: "/images/bjj-nogi.jpg",
     imagePosition: "center top",
   },
   {
