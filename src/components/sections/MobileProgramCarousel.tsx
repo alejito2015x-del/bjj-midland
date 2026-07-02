@@ -55,7 +55,7 @@ const slides = [
     ],
     ctaText: "View MMA Schedule",
     ctaHref: "/?scheduleFilter=mma#schedule",
-    image: "/images/mma-mobile-chatgpt-20260311.jpg",
+    image: "/images/mma-mobile.jpg",
     imagePosition: "30% top",
   },
 ];
