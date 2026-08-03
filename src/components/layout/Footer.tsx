@@ -145,11 +145,11 @@ export default function Footer() {
                 <div className="h-2.5" />
                 <div className="grid grid-cols-1 gap-2.5">
                   <a
-                    href="tel:+14323059480"
+                    href="tel:+14322305545"
                     className="flex items-center justify-center gap-2.5 text-text-secondary hover:text-gold transition-colors text-[0.95rem] leading-tight"
                   >
                     <Phone className="w-4 h-4 text-gold" />
-                    (432) 305-9480
+                    (432) 230-5545
                   </a>
                   <a
                     href="mailto:Midlandbjj@yahoo.com"
@@ -225,11 +225,11 @@ export default function Footer() {
             <div className="h-4 md:h-6" />
             <div className="flex flex-col gap-5">
               <a
-                href="tel:+14323059480"
+                href="tel:+14322305545"
                 className="flex items-center justify-center md:justify-start gap-3 text-text-secondary hover:text-gold transition-colors text-sm"
               >
                 <Phone className="w-4 h-4 text-gold" />
-                (432) 305-9480
+                (432) 230-5545
               </a>
               <a
                 href="mailto:Midlandbjj@yahoo.com"
