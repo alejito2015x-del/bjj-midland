@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone } from "lucide-react";
 import Image from "next/image";
 import { useRegistrationModal } from "@/context/RegistrationModalContext";
+import { SITE_CONFIG } from "@/lib/constants";
 
 const NAV_LINKS = [
   { name: "HOME", href: "/#hero" },
@@ -173,11 +174,11 @@ export default function Navbar() {
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-4">
             <a
-              href="tel:+14322305545"
+              href={`tel:${SITE_CONFIG.phoneTel}`}
               className="flex items-center gap-1.5 text-text-secondary hover:text-gold transition-colors whitespace-nowrap"
             >
               <Phone className="w-3.5 h-3.5" />
-              <span className="text-xs tracking-wider">(432) 230-5545</span>
+              <span className="text-xs tracking-wider">{SITE_CONFIG.phone}</span>
             </a>
             <Link
               href="/contact"
@@ -270,11 +271,11 @@ export default function Navbar() {
                   START FREE TRIAL
                 </Link>
                 <a
-                  href="tel:+14322305545"
+                  href={`tel:${SITE_CONFIG.phoneTel}`}
                   className="flex items-center gap-2 text-gold"
                 >
                   <Phone className="w-5 h-5" />
-                  <span className="text-base sm:text-lg tracking-wider">(432) 230-5545</span>
+                  <span className="text-base sm:text-lg tracking-wider">{SITE_CONFIG.phone}</span>
                 </a>
               </motion.div>
 

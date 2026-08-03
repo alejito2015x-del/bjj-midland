@@ -5,6 +5,7 @@ export const SITE_CONFIG = {
   tagline: "Stay Relentless",
   description: "Premier Brazilian Jiu Jitsu and MMA training center in Midland, Texas. Est. 2000.",
   phone: "(432) 230-5545",
+  phoneTel: "+14322305545",
   whatsapp: "14322305545",
   email: "Midlandbjj@yahoo.com",
   address: "4612 Billingsley Blvd, Midland, TX 79705",

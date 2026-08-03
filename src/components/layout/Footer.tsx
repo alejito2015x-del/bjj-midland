@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Facebook, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { SITE_CONFIG } from "@/lib/constants";
 
 const NAV_LINKS = [
   { name: "Home", href: "/#hero" },
@@ -145,11 +146,11 @@ export default function Footer() {
                 <div className="h-2.5" />
                 <div className="grid grid-cols-1 gap-2.5">
                   <a
-                    href="tel:+14322305545"
+                    href={`tel:${SITE_CONFIG.phoneTel}`}
                     className="flex items-center justify-center gap-2.5 text-text-secondary hover:text-gold transition-colors text-[0.95rem] leading-tight"
                   >
                     <Phone className="w-4 h-4 text-gold" />
-                    (432) 230-5545
+                    {SITE_CONFIG.phone}
                   </a>
                   <a
                     href="mailto:Midlandbjj@yahoo.com"
@@ -225,11 +226,11 @@ export default function Footer() {
             <div className="h-4 md:h-6" />
             <div className="flex flex-col gap-5">
               <a
-                href="tel:+14322305545"
+                href={`tel:${SITE_CONFIG.phoneTel}`}
                 className="flex items-center justify-center md:justify-start gap-3 text-text-secondary hover:text-gold transition-colors text-sm"
               >
                 <Phone className="w-4 h-4 text-gold" />
-                (432) 230-5545
+                {SITE_CONFIG.phone}
               </a>
               <a
                 href="mailto:Midlandbjj@yahoo.com"

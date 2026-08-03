@@ -132,7 +132,7 @@ export default function ContactPage() {
                 <div className="flex flex-col gap-0">
                   {[
                     { icon: MapPin, label: "LOCATION", value: SITE_CONFIG.address, href: undefined },
-                    { icon: Phone,  label: "PHONE",    value: SITE_CONFIG.phone,   href: `tel:${SITE_CONFIG.phone}` },
+                    { icon: Phone,  label: "PHONE",    value: SITE_CONFIG.phone,   href: `tel:${SITE_CONFIG.phoneTel}` },
                     { icon: Mail,   label: "EMAIL",    value: SITE_CONFIG.email,   href: `mailto:${SITE_CONFIG.email}` },
                     { icon: Clock,  label: "HOURS",    value: "Mon–Fri: 6am–9pm · Sat: 8am–2pm · Sun: Closed", href: undefined },
                   ].map(({ icon: Icon, label, value, href }) => (
@@ -256,7 +256,7 @@ export default function ContactPage() {
                               value={formData.phone}
                               onChange={handleChange}
                               className="w-full h-12 px-4 bg-background border border-border text-white placeholder-text-muted focus:outline-none focus:border-gold transition-colors"
-                              placeholder="(432) 230-5545"
+                              placeholder={SITE_CONFIG.phone}
                             />
                           </div>
                         </div>

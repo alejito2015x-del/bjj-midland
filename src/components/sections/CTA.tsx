@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, Clock, Phone } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRegistrationModal } from "@/context/RegistrationModalContext";
+import { SITE_CONFIG } from "@/lib/constants";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 80 },
@@ -88,7 +89,7 @@ export default function CTA() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <a
-                href="tel:+14322305545"
+                href={`tel:${SITE_CONFIG.phoneTel}`}
                 className="btn-predator btn-outline-gold px-10 py-5 text-lg"
               >
                 <Phone className="w-5 h-5" />
