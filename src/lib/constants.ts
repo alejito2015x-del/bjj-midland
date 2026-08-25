@@ -247,7 +247,7 @@ export const SCHEDULE = [
   { day: "Friday", time: "5:00 PM", class: "Lil' Ninjas Gi", type: "kids" },
   { day: "Friday", time: "5:40 PM", class: "Samurai Gi", type: "kids" },
   // Saturday
-  { day: "Saturday", time: "11:00 AM", class: "All Level MMA", type: "mma" },
+  { day: "Saturday", time: "10:00 AM", class: "All Level MMA", type: "mma" },
   { day: "Saturday", time: "11:00 AM", class: "All Level JJ", type: "bjj-gi" },
   // Sunday
   { day: "Sunday", time: "1:00 PM", class: "Open Mat", type: "bjj-nogi" },
