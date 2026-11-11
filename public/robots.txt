@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://bjjmidland.com/sitemap.xml
+Sitemap: https://midlandbjj.com/sitemap.xml

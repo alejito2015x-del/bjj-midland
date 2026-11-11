@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import LocalBusinessSchema from "@/components/seo/LocalBusinessSchema";
 import Providers from "@/components/layout/Providers";
+import { OG_IMAGE, SITE_URL } from "@/lib/seo";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -11,6 +12,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: "/",
+  },
   title: {
     default: "STAY RELENTLESS | BJJ & MMA Midland Texas",
     template: "%s | STAY RELENTLESS BJJ",
@@ -30,6 +35,16 @@ export const metadata: Metadata = {
     title: "STAY RELENTLESS | BJJ & MMA Midland Texas",
     description: "Premier Brazilian Jiu Jitsu and MMA training center in Midland, Texas. Est. 2000.",
     type: "website",
+    url: "/",
+    siteName: "Midland BJJ & MMA",
+    locale: "en_US",
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "STAY RELENTLESS | BJJ & MMA Midland Texas",
+    description: "Premier Brazilian Jiu Jitsu and MMA training center in Midland, Texas. Est. 2000.",
+    images: [OG_IMAGE.url],
   },
 };
 
