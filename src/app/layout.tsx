@@ -4,6 +4,7 @@ import "./globals.css";
 import LocalBusinessSchema from "@/components/seo/LocalBusinessSchema";
 import Providers from "@/components/layout/Providers";
 import { OG_IMAGE, SITE_URL } from "@/lib/seo";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -67,6 +68,9 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} antialiased`}>
         <Providers>{children}</Providers>
+        {/* Cookieless page-view analytics. Only reports on Vercel deployments
+            where Web Analytics is enabled in the project dashboard. */}
+        <Analytics />
       </body>
     </html>
   );
