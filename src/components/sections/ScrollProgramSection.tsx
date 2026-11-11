@@ -299,7 +299,10 @@ export default function ScrollProgramSection({
 
   // Preload sequence frames in memory for smooth scrubbing on canvas.
   useEffect(() => {
-    if (isMobileViewport) return;
+    // isMobileViewport starts as false and only flips after the first commit,
+    // so check the media query directly to avoid downloading desktop-only
+    // frames on mobile (the mobile carousel never uses them).
+    if (isMobileViewport || window.matchMedia("(max-width: 1023px)").matches) return;
     if (!hasImageSequence || !imageFrames) return;
 
     let cancelled = false;
