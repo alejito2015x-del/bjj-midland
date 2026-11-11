@@ -44,10 +44,11 @@ export default function RootLayout({
         <LocalBusinessSchema />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Preload first frame of each scroll sequence so canvas is never black */}
-        <link rel="preload" as="image" href="/images/gi-scroll-sequence/ezgif-frame-001.jpg" />
-        <link rel="preload" as="image" href="/images/nogi-scroll-sequence/ezgif-frame-001.jpg" />
-        <link rel="preload" as="image" href="/images/mma-scroll-sequence/ezgif-frame-001.jpg" />
+        {/* Preload first frame of each scroll sequence so canvas is never black.
+            Desktop only: below 1024px the mobile carousel is shown and never uses these frames. */}
+        <link rel="preload" as="image" media="(min-width: 1024px)" href="/images/gi-scroll-sequence/ezgif-frame-001.jpg" />
+        <link rel="preload" as="image" media="(min-width: 1024px)" href="/images/nogi-scroll-sequence/ezgif-frame-001.jpg" />
+        <link rel="preload" as="image" media="(min-width: 1024px)" href="/images/mma-scroll-sequence/ezgif-frame-001.jpg" />
       </head>
       <body className={`${inter.variable} antialiased`}>
         <Providers>{children}</Providers>
