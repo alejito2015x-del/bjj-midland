@@ -40,9 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# large generated assets (frame sequences)
-public/images/mma-scroll-sequence/
-public/images/nogi-scroll-sequence/
+# unused raw frame exports (the root ezgif-frame-*.jpg files ARE used by the scroll sections and must be committed)
+public/images/*-scroll-sequence/FRAMES_*/
 
 # test artifacts
 testsprite_tests/
