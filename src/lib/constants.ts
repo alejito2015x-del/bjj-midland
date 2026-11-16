@@ -218,7 +218,7 @@ export const SCHEDULE = [
   { day: "Monday", time: "6:30 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Monday", time: "8:30 PM", class: "MMA Wrestling", type: "mma" },
   // Tuesday
-  { day: "Tuesday", time: "5:30 AM", class: "All Level NoGi", type: "bjj-nogi" },
+  { day: "Tuesday", time: "5:30 AM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Tuesday", time: "12:00 PM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Tuesday", time: "4:00 PM", class: "All Level JJ", type: "bjj-gi" },
   { day: "Tuesday", time: "5:00 PM", class: "Lil' Ninja NoGi", type: "kids" },
@@ -241,14 +241,13 @@ export const SCHEDULE = [
   { day: "Thursday", time: "6:30 PM", class: "All Level NoGi", type: "bjj-nogi" },
   { day: "Thursday", time: "8:30 PM", class: "All Level MMA", type: "mma" },
   // Friday
-  { day: "Friday", time: "11:00 AM", class: "Combatives", type: "bjj-gi" },
-  { day: "Friday", time: "12:00 PM", class: "Thunderdome", type: "bjj-nogi" },
-  { day: "Friday", time: "4:00 PM", class: "All Level JJ", type: "bjj-gi" },
+  { day: "Friday", time: "11:00 AM", class: "Combatives", type: "mma" },
+  { day: "Friday", time: "12:00 PM", class: "Open Mat", type: "bjj-nogi" },
   { day: "Friday", time: "5:00 PM", class: "Lil' Ninjas Gi", type: "kids" },
   { day: "Friday", time: "5:40 PM", class: "Samurai Gi", type: "kids" },
   // Saturday
   { day: "Saturday", time: "10:00 AM", class: "All Level MMA", type: "mma" },
-  { day: "Saturday", time: "11:00 AM", class: "All Level JJ", type: "bjj-gi" },
+  { day: "Saturday", time: "11:00 AM", class: "All Level NoGi", type: "bjj-nogi" },
   // Sunday
   { day: "Sunday", time: "1:00 PM", class: "Open Mat", type: "bjj-nogi" },
 ];

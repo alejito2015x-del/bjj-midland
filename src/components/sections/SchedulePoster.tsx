@@ -562,7 +562,6 @@ export default function SchedulePoster() {
                 {[
                   { label: "Open Mat", color: "bg-violet-400" },
                   { label: "Combatives", color: "bg-sky-400" },
-                  { label: "Thunderdome", color: "bg-fuchsia-400" },
                 ].map((special) => (
                   <div key={special.label} className="flex items-center gap-3">
                     <span className={clsx("rounded-full shrink-0", special.color)} style={{ width: "8px", height: "8px" }} />
