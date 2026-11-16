@@ -100,7 +100,7 @@ export default function ClassesPage() {
                   KIDS PROGRAMS
                 </h3>
                 <p className="text-text-secondary text-sm leading-relaxed text-left">
-                  Our Kids BJJ program builds confidence, discipline, and respect both on and off the mat. Lil' Ninjas (ages 4–7) introduces movement, coordination, and fun fundamentals, while our Samurai program (ages 8–14) develops real technique, competition skills, and mental toughness. Classes run Mon–Fri with small group sizes for focused coaching.
+                  Our Kids BJJ program builds confidence, discipline, and respect both on and off the mat. Lil' Ninjas (ages 4–6) introduces movement, coordination, and fun fundamentals, while our Samurai program (ages 7–12) develops real technique, competition skills, and mental toughness. Classes run Mon–Fri with small group sizes for focused coaching.
                 </p>
               </div>
               <div className="card-predator p-8 text-center">
